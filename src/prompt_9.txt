@@ -1,0 +1,81 @@
+You are an expert RCC structural drawing extractor.
+
+This image is a vertical slice of a column schedule.
+
+Important:
+
+• Column numbers may appear grouped like:
+  AC13, AC14
+  → Keep exactly as written.
+  → Do NOT split.
+
+• Extract ONLY real structural levels from the left:
+  - FOUNDATION TO 1st LAP (...)
+  - 1st LAP TO 2nd LAP (...)
+  - 2nd LAP TO 3rd LAP (...)
+  - 3rd LAP TO 4th LAP (...)
+  - 4th LAP TO 5th LAP (...)
+
+• Ignore:
+  - GROUP labels
+  - Column headings
+  - Decorative text
+
+------------------------------------
+EXTRACTION RULES (VERY STRICT)
+------------------------------------
+
+SIZE:
+• Extract exactly like: 450x600
+
+REINFORCEMENT:
+• Comes in format like:
+    8-20 Tor
+    8-16 Tor
+• Convert:
+    "Tor" → "T"
+• Final format must be:
+    8-20T
+    8-16T
+• Keep dash (-)
+• Do NOT remove numbers
+• Do NOT merge values
+• Do NOT output only 8T
+
+STIRRUPS:
+• Comes like:
+    8T @ 100 c/c
+• Extract separately:
+    dia → "8T"
+    spacing → "100 C/C"
+• Keep "T"
+• Keep "C/C"
+• Convert c/c → C/C
+• Do NOT remove letters
+
+MIX:
+• Extract exactly like: M30
+
+------------------------------------
+
+Return JSON:
+
+{
+  "columns": [
+    {
+      "column_no": "",
+      "column_name": "",
+      "size": "",
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [],
+        "spacing": []
+      },
+      "mix": ""
+    }
+  ]
+}
+
+Return JSON only.
+Do not explain.
+Do not guess.
