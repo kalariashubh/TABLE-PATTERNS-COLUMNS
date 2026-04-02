@@ -1,0 +1,3434 @@
+{
+  "columns": [
+    {
+      "column_no": "C1, C18",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "12TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "11TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "10TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "9TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "8TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "7TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "6TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M250",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "5TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "4TH FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "3RD FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "220 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "2ND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "1ST FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-25T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "250 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "GROUND FLOOR",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 300,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "10-22T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "BASEMENT",
+      "size": {
+        "width": 230,
+        "depth": null,
+        "length": 450
+      },
+      "reinforcement": [
+        "4-16T",
+        "8-20T"
+      ],
+      "stirrups": {
+        "dia": [
+          "12T"
+        ],
+        "spacing": [
+          "200 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C1, C18",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 3200,
+        "depth": null,
+        "length": 4100
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C9",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 2400,
+        "depth": null,
+        "length": 2650
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8, C17",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 3200,
+        "depth": null,
+        "length": 4200
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C4, C14",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 3200,
+        "depth": null,
+        "length": 3200
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C8",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 3200,
+        "depth": null,
+        "length": 3200
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C7, C18",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 2960,
+        "depth": null,
+        "length": 3200
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C10",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 2800,
+        "depth": null,
+        "length": 3200
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C11, C13",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 3200,
+        "depth": null,
+        "length": 3200
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C18",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 3100,
+        "depth": null,
+        "length": 3200
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    },
+    {
+      "column_no": "C16",
+      "column_name": "FOOTING",
+      "size": {
+        "width": 2400,
+        "depth": null,
+        "length": 3200
+      },
+      "reinforcement": [],
+      "stirrups": {
+        "dia": [
+          "16T"
+        ],
+        "spacing": [
+          "130 C/C",
+          "150 C/C"
+        ]
+      },
+      "mix": "M300",
+      "steel_grade": "FE500"
+    }
+  ]
+}
