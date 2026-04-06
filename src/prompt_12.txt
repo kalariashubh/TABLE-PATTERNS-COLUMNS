@@ -1,158 +1,190 @@
-You are an expert RCC structural drawing extractor.
-
-This drawing is a COLUMN SCHEDULE – PATTERN 1.
-
-=====================================================
-DRAWING STRUCTURE
-=====================================================
-
-The drawing is a GRID:
-  Rows    = floor level bands (labeled on the LEFT side)
-  Columns = individual column groups (labeled at the BOTTOM in COLUMN MARK row)
-
-LEFT SIDE band label format:
-  "[ordinal] FLOOR COLUMN"  e.g. "12 TH FLOOR COLUMN"
-  "(MIX : M300)"
-  "(SEEL:FE500)"  or  "(STEEL:FE500)"
-
-BOTTOM rows (summary table):
-  Size row       → footing plan dimensions per group
-  D PD d row     → footing depth range per group
-  Short Span row → footing stirrup short span per group
-  Long Span row  → footing stirrup long span per group
-  COLUMN MARK row → column group labels (e.g. C1,C18 | C8,C9 ...)
-
-=====================================================
-CRITICAL — READ THE COLUMN MARK ROW FIRST
-=====================================================
-
-Before extracting anything else, scan the COLUMN MARK row at the
-very bottom of the drawing from LEFT to RIGHT.
-
-Write down every label you see, exactly as written.
-Example labels: C1,C18 | C8,C9 | C8,C17 | C4,C14 | C8 | C7,C18 | C10 | C11,C13 | C18 | C16
-
-⚠️  READ DIGIT BY DIGIT:
-    C18 ≠ C8    (18 ≠ 8)
-    C11 ≠ C1    (11 ≠ 1)
-    C13 ≠ C3    (13 ≠ 3)
-    C17 ≠ C7    (17 ≠ 7)
-    Only extract groups actually present. Do not invent groups.
-
-=====================================================
-STEP 1 — IDENTIFY ALL FLOOR BANDS
-=====================================================
-
-Read the band label on the LEFT of each row.
-Extract the floor name, mix, and steel grade.
-These apply to ALL groups in that band.
-
-Clean the floor name:
-  "12 TH FLOOR COLUMN" → "12TH FLOOR"
-  "GROUND FLOOR COLUMN" → "GROUND FLOOR"
-  "BASEMENT COLUMN" → "BASEMENT"
-
-Extract ALL bands present. Do not assume which ones exist.
-
-=====================================================
-STEP 2 — EXTRACT EACH CELL INDEPENDENTLY
-=====================================================
-
-⚠️  MOST IMPORTANT RULE:
-Every single cell has its OWN values. Read each cell from the drawing.
-DO NOT copy values from adjacent cells, even if they look similar.
-DO NOT assume all cells in a row are the same.
-DO NOT assume all cells in a column are the same.
-
-For each (column group × floor band) intersection:
-
---- column_no ---
-Exact label from the COLUMN MARK row. Uppercase. Comma-separated.
-Example: "C1, C18"  or  "C8, C9"  or  "C10"
-
---- column_name ---
-Cleaned floor name. Example: "12TH FLOOR"  or  "GROUND FLOOR"
-
---- size ---
-Two numbers shown on the sides of the rectangular column diagram.
-  Number on the SHORT side = width
-  Number on the LONG side  = length
-  depth = always null for floor columns
-
-Read directly from each individual diagram. Values differ between groups.
-
---- reinforcement ---
-Bar labels written BESIDE the column diagram. Format: "count ф diameter"
-Convert: "10 ф 20" → "10-20T",  "4 ф 16" → "4-16T"
-A leading "+" means extra bars — strip it: "+4 ф 16" → "4-16T"
-Collect ALL labels visible. There are typically 2–3 per cell.
-Values differ between groups AND between floors. Read each one fresh.
-
---- stirrups ---
-Label below/beside the diagram. Format: "count ф spacingC/C"
-  "16 ф 130C/C" → dia: ["16T"], spacing: ["130 C/C"]
-If two lines exist, include both spacings. Values differ per cell.
-
---- mix ---
-From the band label: "(MIX : M250)" → "M250"
-
---- steel_grade ---
-From the band label: "(SEEL:FE500)" → "FE500"
-
-=====================================================
-FOOTING TABLE (bottom of drawing)
-=====================================================
-
-For each column group, extract one FOOTING record.
-
-  column_name: "FOOTING"
-  size: parse the Size row value e.g. "3200 X 4100"
-        → width=3200, depth=null, length=4100
-        Values differ per group — read each one.
-  reinforcement: []
-  stirrups: read from Short Span and Long Span rows for that group.
-            If both differ, include both spacings.
-            Values differ per group.
-  mix: from FOOTING DETAILS label if shown, else null
-  steel_grade: from FOOTING DETAILS label if shown, else null
-
-=====================================================
-SELF-CHECK BEFORE OUTPUT
-=====================================================
-
-Before returning JSON, verify:
-1. column_no values match EXACTLY what is in the COLUMN MARK row.
-   No invented groups (C2, C3, C6 etc. if they are not in that row).
-2. Size values are NOT all the same — they vary across groups.
-3. Reinforcement lists are NOT all identical — they vary across groups and floors.
-4. Total records = (groups in COLUMN MARK row) × (floor bands) + footing records.
-
-=====================================================
-OUTPUT FORMAT
-=====================================================
-
-Return ONLY raw JSON. No markdown. No code fences.
+You are an expert structural RCC column schedule extractor.
+Extract the column schedule from the drawing.
+Return STRICT JSON in this exact format:
 
 {
   "columns": [
     {
-      "column_no": "C1, C18",
-      "column_name": "12TH FLOOR",
+      "column_no": "",
+      "column_name": "",
       "size": {
-        "width": 300,
+        "width": null,
         "depth": null,
-        "length": 450
+        "length": null
       },
-      "reinforcement": ["10-20T", "4-16T"],
+      "reinforcement": [],
       "stirrups": {
-        "dia": ["16T"],
-        "spacing": ["130 C/C"]
+        "dia": "",
+        "spacing": ""
       },
-      "mix": "M300",
-      "steel_grade": "FE500"
+      "mix": null,
+      "steel_grade": null
     }
   ]
 }
 
-Order: left-to-right across groups, top floor first within each group,
-FOOTING records at the end.
+===========================
+DRAWING STRUCTURE — PATTERN 12
+===========================
+
+This drawing is a grid of column cross-section diagrams.
+
+FIELD MAPPING — read carefully:
+  column_no   = COLUMN MARK from the BOTTOM ROW  (e.g. "C1,C18", "C2,C9", "C5")
+  column_name = FLOOR LABEL from the LEFT COLUMN  (e.g. "12TH FLOOR COLUMN", "BASEMENT COLUMN")
+  size        = dimensions shown beside the cross-section diagram inside the cell
+  reinforcement = bar count and diameter annotations inside the cross-section
+  stirrups    = from the FOOTING DETAILS row at the very bottom of the drawing
+  mix         = from floor label e.g. M250 or M300
+  steel_grade = always "FE500" (from SEEL:FE500 in floor label)
+
+===========================
+EXTRACTION ORDER
+===========================
+
+Extract floors from BOTTOM TO TOP:
+  1. BASEMENT COLUMN         (MIX: M300, SEEL: FE500)
+  2. GROUND FLOOR COLUMN     (MIX: M300, SEEL: FE500)
+  3. 1ST FLOOR COLUMN        (MIX: M300, SEEL: FE500)
+  4. 2ND FLOOR COLUMN        (MIX: M300, SEEL: FE500)
+  5. 3RD FLOOR COLUMN        (MIX: M300, SEEL: FE500)
+  6. 4TH FLOOR COLUMN        (MIX: M300, SEEL: FE500)
+  7. 5TH FLOOR COLUMN        (MIX: M300, SEEL: FE500)
+  8. 6TH FLOOR COLUMN        (MIX: M250, SEEL: FE500)
+  9. 7TH FLOOR COLUMN        (MIX: M250, SEEL: FE500)
+  10. 8TH FLOOR COLUMN       (MIX: M250, SEEL: FE500)
+  11. 9TH FLOOR COLUMN       (MIX: M250, SEEL: FE500)
+  12. 10TH FLOOR COLUMN      (MIX: M250, SEEL: FE500)
+  13. 11TH FLOOR COLUMN      (MIX: M250, SEEL: FE500)
+  14. 12TH FLOOR COLUMN      (MIX: M250, SEEL: FE500)
+
+===========================
+COLUMN MARK (column_no)
+===========================
+
+The COLUMN MARK row is at the very bottom of the drawing grid.
+Each cell position has one or more column marks written together:
+
+  Position 1: C1,C18
+  Position 2: C2,C9
+  Position 3: C3,C17
+  Position 4: C4,C14
+  Position 5: C5
+  Position 6: C7,C16
+  Position 7: C8
+  Position 8: C10
+  Position 9: C11,C19
+  Position 10: C12
+  Position 11: C15
+
+Write column_no EXACTLY as shown including comma-separated marks:
+  "C1,C18", "C2,C9", "C3,C17", "C4,C14", "C5", "C7,C16", "C8", "C10", "C11,C19", "C12", "C15"
+
+Do NOT split into separate entries — keep the group as-is.
+
+===========================
+SIZE EXTRACTION
+===========================
+
+Each cross-section shows its width and depth dimensions beside the diagram (in mm).
+  width = horizontal dimension
+  depth = null always
+  length = vertical dimension
+
+Examples seen in this drawing:
+  "300" wide, "1200" tall  → width=300, length=1200
+  "450" wide, "1200" tall  → width=450, length=1200
+  "230" wide, "750" tall   → width=230, length=750
+  "300" wide, "750" tall   → width=300, length=750
+  "375" wide, "750" tall   → width=375, length=750
+  "230" wide, "1000" tall  → width=230, length=1000
+  "300" wide, "1000" tall  → width=300, length=1000
+
+===========================
+REINFORCEMENT EXTRACTION
+===========================
+
+Bar annotations are around the cross-section diagram written as:
+  "COUNT ⌀ DIA"  or  "COUNT φ DIA"
+
+FORMAT: COUNT-DIAT  (count hyphen dia then T)
+
+Examples:
+  "4 ⌀ 16"   → "4-16T"
+  "10 ⌀ 20"  → "10-20T"
+  "20 ⌀ 12"  → "20-12T"
+  "8 ⌀ 20"   → "8-20T"
+  "14 ⌀ 16"  → "14-16T"
+  "6 ⌀ 20"   → "6-20T"
+  "12 ⌀ 20"  → "12-20T"
+  "5 ⌀ 20"   → "5-20T"
+  "3 ⌀ 16"   → "3-16T"
+  "4 ⌀ 25"   → "4-25T"
+  "14 ⌀ 20"  → "14-20T"
+
+A cross-section may show multiple bar groups — include ALL of them as separate list items.
+
+===========================
+STIRRUPS — FROM FOOTING DETAILS ROW
+===========================
+
+The FOOTING DETAILS row at the bottom has two stirrup rows:
+  - Short Span row
+  - Long Span row
+
+Each cell in the footing row has stirrups written as:
+  "⌀ DIA @ SPACING C/C"
+
+dia FORMAT: "DIAT"  (just diameter number + T)
+  "⌀ 16 @ 130 C/C"  → dia = "16T"
+  "⌀ 12 @ 100 C/C"  → dia = "12T"
+  "⌀ 16 @ 100 C/C"  → dia = "16T"
+  "⌀ 16 @ 150 C/C"  → dia = "16T"
+  "⌀ 16 @ 165 C/C"  → dia = "16T"
+  "⌀ 16 @ 175 C/C"  → dia = "16T"
+  "⌀ 16 @ 115 C/C"  → dia = "16T"
+
+spacing FORMAT: "SPACING C/C"
+  For each column position, use the Short Span stirrup spacing.
+  "⌀ 16 @ 130 C/C"  → spacing = "130 C/C"
+  "⌀ 12 @ 100 C/C"  → spacing = "100 C/C"
+  "⌀ 16 @ 165 C/C"  → spacing = "165 C/C"
+  "⌀ 16 @ 175 C/C"  → spacing = "175 C/C"
+  "⌀ 16 @ 115 C/C"  → spacing = "115 C/C"
+  "⌀ 16 @ 150 C/C"  → spacing = "150 C/C"
+
+Note: C/S means same as C/C — always output as C/C.
+
+The stirrup details from FOOTING DETAILS apply to ALL floors for that column position.
+Use the same stirrup dia and spacing for every floor of the same column mark group.
+
+===========================
+EXACT FOOTING STIRRUPS PER COLUMN POSITION
+===========================
+
+Read from the FOOTING DETAILS row Short Span values:
+
+  C1,C18   → ⌀ 16 @ 130 C/C  → dia="16T", spacing="130 C/C"
+  C2,C9    → ⌀ 12 @ 100 C/C  → dia="12T", spacing="100 C/C"
+  C3,C17   → ⌀ 16 @ 100 C/C  → dia="16T", spacing="100 C/C"
+  C4,C14   → ⌀ 12 @ 100 C/C  → dia="12T", spacing="100 C/C"
+  C5       → ⌀ 16 @ 100 C/C  → dia="16T", spacing="100 C/C"
+  C7,C16   → ⌀ 16 @ 100 C/C  → dia="16T", spacing="100 C/C"
+  C8       → ⌀ 16 @ 150 C/C  → dia="16T", spacing="150 C/C"
+  C10      → ⌀ 16 @ 165 C/C  → dia="16T", spacing="165 C/C"
+  C11,C19  → ⌀ 16 @ 175 C/C  → dia="16T", spacing="175 C/C"
+  C12      → ⌀ 16 @ 115 C/C  → dia="16T", spacing="115 C/C"
+  C15      → ⌀ 16 @ 100 C/C  → dia="16T", spacing="100 C/C"
+
+===========================
+IMPORTANT RULES
+===========================
+
+- column_no = COLUMN MARK (from bottom), column_name = FLOOR (from left side)
+- Keep multi-mark column_no as group string: "C1,C18" NOT split into two entries
+- Extract from BOTTOM floor (BASEMENT) to TOP floor (12TH)
+- Read size and reinforcement from the cross-section diagram for each cell
+- Use footing stirrups for ALL floors of that column position
+- steel_grade = "FE500" for all entries
+- Do NOT guess — read only what is visible
+- Return ONLY valid raw JSON — no markdown, no explanation
