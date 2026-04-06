@@ -1,326 +1,369 @@
 import os
-import re
 import json
+import re
 from tqdm import tqdm
-from collections import defaultdict
+from PIL import Image
 
 from config import INPUT_DIR, OUTPUT_DIR
 from pdf_to_images import convert_pdf_to_images
 from vision_extractor import extract_from_image
 
 
+# ================================
+# Load Prompt
+# ================================
 def load_prompt():
-    with open(
-        os.path.join(os.path.dirname(__file__), "prompt_12.txt"),
-        "r",
-        encoding="utf-8"
-    ) as f:
+    prompt_path = os.path.join(os.path.dirname(__file__), "prompt_12.txt")
+    with open(prompt_path, "r", encoding="utf-8") as f:
         return f.read()
 
 
-# ─────────────────────────────────────────────
-# Normalization
-# ─────────────────────────────────────────────
-
-def normalize_reinforcement_entry(r):
-    r = str(r).strip().lstrip("+").strip()
-    m = re.match(r'^(\d+)\s*[фφΦ@ø]\s*(\d+)\s*[Tt]?$', r)
-    if m:
-        return f"{m.group(1)}-{m.group(2)}T"
-    m = re.match(r'^(\d+)[-\s]+(\d+)\s*[Tt]?$', r.replace(' ', '-'))
-    if m:
-        return f"{m.group(1)}-{m.group(2)}T"
-    r = re.sub(r'\s*[Tt][Oo][Rr]\s*$', 'T', r)
-    r = re.sub(r'\s*-\s*', '-', r)
-    r = r.replace(' ', '')
-    return r if r else None
+# ================================
+# Crop Bottom Region (Fallback)
+# ================================
+def crop_bottom_region(image_path, crop_ratio=0.30):
+    """Crops bottom portion of image. Default = bottom 30%."""
+    img = Image.open(image_path)
+    width, height = img.size
+    crop_height = int(height * crop_ratio)
+    cropped = img.crop((0, height - crop_height, width, height))
+    cropped_path = image_path.replace(".png", "_cropped.png")
+    cropped.save(cropped_path)
+    return cropped_path
 
 
-def normalize_reinforcement(reinforcement):
-    if not reinforcement or not isinstance(reinforcement, list):
+# ================================
+# Reinforcement Normalization
+# ================================
+def normalize_reinforcement(reinf_raw):
+    """
+    Normalize reinforcement into clean list.
+
+    Input formats for pattern-12:
+      "4 ⌀ 16"    → "4-16T"
+      "10 ⌀ 20"   → "10-20T"
+      "4-16T"     → already clean
+      ["4-16T", "10-20T"] → list input
+
+    Output: ["4-16T", "10-20T"]
+    """
+    cleaned = []
+
+    if isinstance(reinf_raw, list):
+        items = reinf_raw
+    elif isinstance(reinf_raw, str):
+        items = [reinf_raw]
+    else:
         return []
-    result = []
-    for r in reinforcement:
-        n = normalize_reinforcement_entry(r)
-        if n and n not in result:
-            result.append(n)
-    return result
 
+    for item in items:
+        if not item:
+            continue
 
-def parse_stirrup_string(s):
-    s = str(s).strip()
-    m = re.match(r'^(\d+)\s*[фφΦ@ø]\s*(\d+)\s*[Cc]/[Cc]', s)
-    if m:
-        return f"{m.group(1)}T", f"{m.group(2)} C/C"
-    return None, None
+        item = str(item).strip()
 
+        # Split on + or newline for multiple groups
+        parts = re.split(r'[\+\n]', item)
 
-def normalize_spacing_entry(s):
-    s = str(s).strip().upper().replace(' ', '')
-    s = re.sub(r'^@\s*', '', s)
-    if re.match(r'^\d+$', s):
-        return f"{s} C/C"
-    s = re.sub(r'C/C$', ' C/C', s).strip()
-    return s if s else None
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
 
+            # Replace TOR with T
+            part = re.sub(r'(?i)\btor\b', 'T', part)
 
-def normalize_stirrups(stirrups):
-    if not stirrups or not isinstance(stirrups, dict):
-        return {"dia": [], "spacing": []}
-
-    raw_dia     = stirrups.get("dia", [])
-    raw_spacing = stirrups.get("spacing", [])
-
-    if not isinstance(raw_dia, list):
-        raw_dia = [raw_dia]
-    if not isinstance(raw_spacing, list):
-        raw_spacing = [raw_spacing]
-
-    dia     = []
-    spacing = []
-
-    for d in raw_dia:
-        d_str = str(d).strip()
-        pd, ps = parse_stirrup_string(d_str)
-        if pd:
-            if pd not in dia:
-                dia.append(pd)
-            if ps and ps not in spacing:
-                spacing.append(ps)
-        else:
-            d_str = re.sub(r'\s*[Tt][Oo][Rr]\s*', 'T', d_str).replace(' ', '')
-            m = re.match(r'^(\d+)[Tt]?$', d_str)
+            # Convert "COUNT ⌀/φ/ø/@ DIA" → "COUNT-DIAT"
+            m = re.match(r'^(\d+)\s*[⌀φøΦ@]\s*(\d+)\s*T?$', part, re.IGNORECASE)
             if m:
-                nd = f"{m.group(1)}T"
-                if nd not in dia:
-                    dia.append(nd)
+                count = m.group(1)
+                dia   = m.group(2)
+                part  = f"{count}-{dia}T"
 
-    for s in raw_spacing:
-        s_str = str(s).strip()
-        if re.search(r'[Rr]ing', s_str):
-            continue
-        pd, ps = parse_stirrup_string(s_str)
-        if ps:
-            if pd and pd not in dia:
-                dia.append(pd)
-            if ps not in spacing:
-                spacing.append(ps)
-        else:
-            ns = normalize_spacing_entry(s_str)
-            if ns and ns not in spacing:
-                spacing.append(ns)
+            # Remove all spaces
+            part = re.sub(r'\s+', '', part)
 
-    return {"dia": dia, "spacing": spacing}
+            # Ensure ends with T
+            if not part.upper().endswith('T'):
+                if re.match(r'^\d+-\d+$', part):
+                    part = part + 'T'
+                else:
+                    continue
 
+            part = part.upper()
 
-def normalize_size(size):
-    if isinstance(size, str):
-        nums = [int(n) for n in re.findall(r'\d+', size)]
-        if len(nums) == 2:
-            return {"width": nums[0], "depth": None, "length": nums[1]}
-        elif len(nums) == 3:
-            return {"width": nums[0], "depth": nums[1], "length": nums[2]}
-        return {"width": None, "depth": None, "length": None}
+            # Final validation: COUNT-DIAT
+            if re.match(r'^\d+-\d+T$', part):
+                if part not in cleaned:
+                    cleaned.append(part)
 
-    if isinstance(size, dict):
-        def safe_int(v):
-            if v is None:
-                return None
-            try:
-                return int(v)
-            except (ValueError, TypeError):
-                return None
-        return {
-            "width":  safe_int(size.get("width")),
-            "depth":  safe_int(size.get("depth")),
-            "length": safe_int(size.get("length")),
-        }
-
-    return {"width": None, "depth": None, "length": None}
+    return cleaned
 
 
-def normalize_column_no(col_no):
-    col_no = str(col_no).strip().upper()
-    parts = [p.strip() for p in re.split(r'[,;]+', col_no)]
-    parts = [p for p in parts if p]
-    return ", ".join(parts)
+# ================================
+# Stirrup DIA Normalization
+# ================================
+def normalize_stirrup_dia(dia_raw):
+    """
+    Normalize stirrup dia for pattern-12.
+    Format: "DIAT"  (just diameter + T, no endcount)
+
+    Input: "16T", "⌀ 16", "16", "16 @ 130 C/C"
+    Output: "16T", "12T"
+    """
+    if not dia_raw:
+        return ""
+
+    dia_raw = str(dia_raw).strip()
+
+    # Already correct: "16T", "12T"
+    if re.match(r'^\d+T$', dia_raw, re.IGNORECASE):
+        return dia_raw.upper()
+
+    # Handle formats like "8-T8" or "8T-8" from other patterns
+    m = re.match(r'^(\d+)-?T(\d+)?$', dia_raw, re.IGNORECASE)
+    if m:
+        return f"{m.group(1)}T"
+
+    # Remove diameter symbols
+    dia_raw = re.sub(r'[⌀φøΦ]', '', dia_raw)
+
+    # Replace TOR with T
+    dia_raw = re.sub(r'(?i)\btor\b', 'T', dia_raw)
+
+    # Extract first number (the diameter)
+    m = re.match(r'\s*(\d+)', dia_raw)
+    if m:
+        return f"{m.group(1)}T"
+
+    return ""
 
 
-def normalize_column_name(name):
-    if not name:
-        return name
-    return str(name).strip().upper()
+# ================================
+# Stirrup SPACING Normalization
+# ================================
+def normalize_stirrup_spacing(spacing_raw):
+    """
+    Normalize stirrup spacing to "NUMBER C/C" format.
+
+    Input: "130 C/C", "130C/C", "130C/S", "130", ["130 C/C"]
+    Output: "130 C/C"
+    """
+    if not spacing_raw:
+        return ""
+
+    if isinstance(spacing_raw, list):
+        spacing_raw = spacing_raw[0] if spacing_raw else ""
+
+    spacing_raw = str(spacing_raw).strip()
+
+    m = re.search(r'(\d+)', spacing_raw)
+    if m:
+        val = int(m.group(1))
+        if val > 20:
+            return f"{val} C/C"
+
+    return ""
 
 
-def normalize_grade(val):
-    if not val:
-        return None
-    return str(val).strip().upper()
+# ================================
+# Normalize Column Name (floor label)
+# ================================
+def normalize_column_name(raw):
+    """
+    Clean up floor label.
+    "12 TH FLOOR COLUMN" → "12TH FLOOR COLUMN"
+    "BASEMENT COLUMN"    → "BASEMENT COLUMN"
+    """
+    if not raw:
+        return ""
+    # Remove extra spaces between number and TH/ST/ND/RD
+    cleaned = re.sub(r'(\d+)\s+(TH|ST|ND|RD)\b', r'\1\2', str(raw).strip(), flags=re.IGNORECASE)
+    # Collapse multiple spaces
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip().upper()
+    return cleaned
 
 
-# ─────────────────────────────────────────────
-# Validation
-# ─────────────────────────────────────────────
-
-def is_valid_column(col):
-    col_no = str(col.get("column_no", "")).strip().upper()
-    if not col_no:
-        return False
-    parts = [p.strip() for p in re.split(r'[,;]+', col_no)]
-    return any(re.match(r'^C\d+$', p) for p in parts)
-
-
-def post_process(columns):
-    processed = []
-    for col in columns:
-        if not isinstance(col, dict):
-            continue
-        if not is_valid_column(col):
-            continue
-        col["column_no"]     = normalize_column_no(col.get("column_no", ""))
-        col["column_name"]   = normalize_column_name(col.get("column_name", ""))
-        col["size"]          = normalize_size(col.get("size"))
-        col["reinforcement"] = normalize_reinforcement(col.get("reinforcement", []))
-        col["stirrups"]      = normalize_stirrups(col.get("stirrups"))
-        col["mix"]           = normalize_grade(col.get("mix"))
-        col["steel_grade"]   = normalize_grade(col.get("steel_grade"))
-        processed.append(col)
-    return processed
+# ================================
+# Normalize Column No (column mark group)
+# ================================
+def normalize_column_no(raw):
+    """
+    Normalize column mark group.
+    "C1, C18" → "C1,C18"
+    "C1,C18"  → "C1,C18"
+    "C5"      → "C5"
+    """
+    if not raw:
+        return ""
+    # Remove spaces around commas, uppercase
+    parts = [p.strip().upper() for p in str(raw).split(',') if p.strip()]
+    return ','.join(parts)
 
 
-# ─────────────────────────────────────────────
-# Merge — last write wins per cell key
-# ─────────────────────────────────────────────
-
-def merge_pages(all_columns):
-    seen = {}
-    for col in all_columns:
-        key = (col["column_no"], col["column_name"])
-        seen[key] = col
-    return list(seen.values())
-
-
-# ─────────────────────────────────────────────
-# Quality check — warn if model copy-pasted
-# ─────────────────────────────────────────────
-
-def quality_check(columns):
-    groups = defaultdict(list)
-    for col in columns:
-        if col["column_name"] != "FOOTING":
-            groups[col["column_no"]].append(col)
-
-    warned = False
-    for col_no, entries in groups.items():
-        if len(entries) < 2:
-            continue
-        reinf_values = [tuple(e["reinforcement"]) for e in entries]
-        size_values  = [(e["size"]["width"], e["size"]["depth"]) for e in entries]
-        if len(set(reinf_values)) == 1 and len(set(size_values)) == 1:
-            print(f"   ⚠️  COPY DETECTED: {col_no} — all floors identical. Model likely hallucinated.")
-            warned = True
-    if warned:
-        print("   → Re-run or manually verify these groups.\n")
+# ================================
+# Check Parsed Data Validity
+# ================================
+def has_columns(parsed):
+    return (
+        isinstance(parsed, dict) and
+        isinstance(parsed.get("columns"), list) and
+        len(parsed["columns"]) > 0
+    )
 
 
-# ─────────────────────────────────────────────
-# Completeness report
-# ─────────────────────────────────────────────
+# ================================
+# Try Extraction (Full → Fallback Crop)
+# ================================
+def extract_with_fallback(image_path, prompt):
+    """
+    First attempts extraction on full image.
+    If that fails, crops the bottom 30% and retries.
+    """
 
-def report_completeness(columns):
-    groups     = defaultdict(set)
-    all_floors = set()
+    # ---- First Attempt (Full Image) ----
+    result = extract_from_image(image_path, prompt)
 
-    for col in columns:
-        groups[col["column_no"]].add(col["column_name"])
-        all_floors.add(col["column_name"])
+    print(f"\n[DEBUG] Raw model output (first 400 chars):\n{result[:400]}\n")
 
-    n_groups = len(groups)
-    n_floors = len(all_floors)
-    actual   = len(columns)
+    try:
+        parsed = json.loads(result)
+        if has_columns(parsed):
+            print(f"✅ Extracted {len(parsed['columns'])} entries using full image")
+            return parsed
+    except Exception as e:
+        print(f"[DEBUG] JSON parse error: {e}")
 
-    print(f"\n📊 Extraction summary:")
-    print(f"   Column groups : {n_groups}")
-    print(f"   Floor bands   : {n_floors}")
-    print(f"   Total records : {actual}")
-    print(f"   Groups found  : {sorted(groups.keys())}")
+    # ---- Fallback: Crop Bottom ----
+    print("⚠ Full image extraction failed. Trying cropped bottom region...")
 
-    for col_no, found in sorted(groups.items()):
-        missing = all_floors - found
-        if missing:
-            print(f"   ⚠️  INCOMPLETE: {col_no} — missing: {sorted(missing)}")
+    cropped_path = crop_bottom_region(image_path)
+    result = extract_from_image(cropped_path, prompt)
 
-    if n_groups < 5:
-        print(f"\n   ❗ Only {n_groups} groups found — model may have missed groups.")
+    try:
+        parsed = json.loads(result)
+        if has_columns(parsed):
+            print(f"✅ Extracted {len(parsed['columns'])} entries using cropped image")
+            return parsed
+    except Exception:
+        pass
 
-    quality_check(columns)
-
-
-# ─────────────────────────────────────────────
-# JSON parsing
-# ─────────────────────────────────────────────
-
-def parse_model_output(raw):
-    text = raw.strip()
-    if '```' in text:
-        parts = text.split('```')
-        if len(parts) >= 3:
-            block = parts[1]
-            if block.lower().startswith('json'):
-                block = block[4:]
-            text = block.strip()
-    brace_idx = text.find('{')
-    if brace_idx > 0:
-        text = text[brace_idx:]
-    return json.loads(text)
+    print("❌ Extraction failed even after cropping.")
+    return {"columns": []}
 
 
-# ─────────────────────────────────────────────
-# Main pipeline
-# ─────────────────────────────────────────────
+# ================================
+# Clean Column Entry
+# ================================
+def clean_column(col):
+    """
+    Normalize a single column entry into the final output format.
 
+    For pattern-12:
+      column_no   = COLUMN MARK group (e.g. "C1,C18")
+      column_name = FLOOR LABEL       (e.g. "12TH FLOOR COLUMN")
+    """
+
+    # ── Size ──────────────────────────────────────────────────────────────────
+    size_data = col.get("size") or {}
+    if isinstance(size_data, dict):
+        width  = size_data.get("width")
+        depth  = size_data.get("depth")
+        length = size_data.get("length")
+    else:
+        width = depth = length = None
+
+    # ── Reinforcement ─────────────────────────────────────────────────────────
+    reinf_raw     = col.get("reinforcement") or []
+    reinforcement = normalize_reinforcement(reinf_raw)
+
+    # ── Stirrups ──────────────────────────────────────────────────────────────
+    stirrups_data = col.get("stirrups") or {}
+    if isinstance(stirrups_data, dict):
+        dia_raw     = stirrups_data.get("dia", "")
+        spacing_raw = stirrups_data.get("spacing", "")
+    else:
+        dia_raw     = str(stirrups_data) if stirrups_data else ""
+        spacing_raw = ""
+
+    dia     = normalize_stirrup_dia(dia_raw)
+    spacing = normalize_stirrup_spacing(spacing_raw)
+
+    # ── column_no and column_name ──────────────────────────────────────────────
+    column_no   = normalize_column_no(col.get("column_no", ""))
+    column_name = normalize_column_name(col.get("column_name", ""))
+
+    # ── Mix & Steel ───────────────────────────────────────────────────────────
+    mix         = col.get("mix")
+    steel_grade = col.get("steel_grade") or "FE500"
+
+    return {
+        "column_no":   column_no,
+        "column_name": column_name,
+        "size": {
+            "width":  width,
+            "depth":  depth,
+            "length": length
+        },
+        "reinforcement": reinforcement,
+        "stirrups": {
+            "dia":     dia,
+            "spacing": spacing
+        },
+        "mix":         mix,
+        "steel_grade": steel_grade
+    }
+
+
+# ================================
+# Process PDF
+# ================================
 def process_pdf(pdf_path):
-    file_name = os.path.splitext(os.path.basename(pdf_path))[0]
-    output_folder = os.path.join(OUTPUT_DIR, file_name)
-    os.makedirs(output_folder, exist_ok=True)
 
-    image_paths = convert_pdf_to_images(pdf_path, output_folder, dpi=300)
-    prompt      = load_prompt()
-    all_columns = []
+    file_name = os.path.splitext(os.path.basename(pdf_path))[0]
+    file_output_folder = os.path.join(OUTPUT_DIR, file_name)
+    os.makedirs(file_output_folder, exist_ok=True)
+
+    print(f"\n📄 Converting {file_name}.pdf to images...")
+    image_paths = convert_pdf_to_images(pdf_path, file_output_folder)
+
+    prompt = load_prompt()
+
+    final_columns = []
 
     for img_path in tqdm(image_paths, desc=f"Processing {file_name}"):
-        result = extract_from_image(img_path, prompt)
 
-        try:
-            parsed      = parse_model_output(result)
-            raw_columns = parsed.get("columns", [])
-            if not isinstance(raw_columns, list):
-                continue
-            processed = post_process(raw_columns)
-            all_columns.extend(processed)
+        parsed = extract_with_fallback(img_path, prompt)
 
-        except Exception as e:
-            print(f"  ⚠️  Failed to parse {os.path.basename(img_path)}: {e}")
-            debug_path = os.path.splitext(img_path)[0] + "_raw.txt"
-            try:
-                with open(debug_path, "w", encoding="utf-8") as dbg:
-                    dbg.write(result)
-                print(f"     Raw output → {debug_path}")
-            except Exception:
-                pass
+        columns = parsed.get("columns", [])
+        if not isinstance(columns, list):
             continue
 
-    final_columns = merge_pages(all_columns)
-    report_completeness(final_columns)
+        for col in columns:
+            cleaned = clean_column(col)
+            final_columns.append(cleaned)
 
-    output_file = os.path.join(output_folder, f"{file_name}.json")
+    # ── Final output ───────────────────────────────────────────────────────────
+    output_data = {"columns": final_columns}
+
+    output_file = os.path.join(file_output_folder, f"{file_name}.json")
+
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump({"columns": final_columns}, f, indent=2, ensure_ascii=False)
+        json.dump(output_data, f, indent=2, ensure_ascii=False)
 
-    print(f"✅ Saved → {output_file}  ({len(final_columns)} records)\n")
+    print(f"\n✅ Output saved to: {output_file}")
+    print(f"   Total column entries: {len(final_columns)}")
+
+    if final_columns:
+        print("\n-- Preview (first entry) " + "-" * 40)
+        print(json.dumps(final_columns[0], indent=2))
 
 
+# ================================
+# Main
+# ================================
 def main():
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     pdf_files = [
@@ -329,7 +372,7 @@ def main():
     ]
 
     if not pdf_files:
-        print("No PDF files found in INPUT_DIR.")
+        print("⚠ No PDF files found in input folder.")
         return
 
     for pdf in pdf_files:
