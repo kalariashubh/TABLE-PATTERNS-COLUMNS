@@ -1,0 +1,532 @@
+{
+  "document": "1.pdf",
+  "title": "Column Schedule",
+  "columns": [
+    "C1",
+    "C2",
+    "C2A",
+    "C3",
+    "C4",
+    "C5",
+    "C8",
+    "C7",
+    "C8",
+    "C8",
+    "C10",
+    "C11"
+  ],
+  "floors": [
+    "6th FLOOR COLUMN",
+    "5th FLOOR COLUMN",
+    "4th FLOOR COLUMN",
+    "3rd FLOOR COLUMN",
+    "2nd FLOOR COLUMN",
+    "1st FLOOR COLUMN",
+    "GROUND FLOOR COLUMN",
+    "BASE. FLOOR COLUMN"
+  ],
+  "fields_per_cell": [
+    "SIZE",
+    "CONC_MIX",
+    "VERT_REINF",
+    "RING"
+  ],
+  "data": {
+    "6th_FLOOR_COLUMN": {
+      "C1": {
+        "SIZE": "330 X 1100",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 12-16 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 4 SETS + 1 LINK"
+      },
+      "C2": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 10-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C2A": {
+        "SIZE": "300 X 970",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 10-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C3": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "14-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C4": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 4-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C5": {
+        "SIZE": "230 X 1330",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "18-16 TOR",
+        "RING": "8 TOR @ 125 C/C 3 SETS + 3 LINKS"
+      },
+      "C8": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "13-20 TOR + 14-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 6 SETS + 3 LINKS"
+      },
+      "C7": {
+        "SIZE": "230 X 1075",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 10-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 3 LINKS"
+      },
+      "C10": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-25 TOR + 10-20 TOR",
+        "RING": "10 TOR 15 @ 75 +@ 115 + 15 @ 75 C/C, 3 SETS + 4 LINKS"
+      },
+      "C11": {
+        "SIZE": "230 X 1220",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 12-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 4 LINKS"
+      }
+    },
+    "5th_FLOOR_COLUMN": {
+      "C1": {
+        "SIZE": "330 X 1100",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 4 SETS + 1 LINK"
+      },
+      "C2": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C2A": {
+        "SIZE": "350 X 970",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C3": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 10-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C4": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 4-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C5": {
+        "SIZE": "230 X 1330",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 14-16 TOR",
+        "RING": "8 TOR 125 C/C 3 SETS + 3 LINKS"
+      },
+      "C8": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "17-20 TOR + 10-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 6 SETS + 3 LINKS"
+      },
+      "C7": {
+        "SIZE": "230 X 1075",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 8-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 3 LINKS"
+      },
+      "C10": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "14-25 TOR + 8-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 3 SETS + 4 LINKS"
+      },
+      "C11": {
+        "SIZE": "230 X 1220",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 12-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 4 LINKS"
+      }
+    },
+    "4th_FLOOR_COLUMN": {
+      "C1": {
+        "SIZE": "330 X 1100",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C 4 SETS + 1 LINK"
+      },
+      "C2": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C2A": {
+        "SIZE": "350 X 970",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C3": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 10-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C4": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 4-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C5": {
+        "SIZE": "230 X 1330",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 14-16 TOR",
+        "RING": "8 TOR @ 125 C/C, 3 SETS + 3 LINKS"
+      },
+      "C8": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "17-20 TOR + 10-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 6 SETS + 3 LINKS"
+      },
+      "C7": {
+        "SIZE": "230 X 1075",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 8-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 3 LINKS"
+      },
+      "C10": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "14-25 TOR + 8-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 3 SETS + 4 LINKS"
+      },
+      "C11": {
+        "SIZE": "230 X 1220",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 10-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C 2 SETS + 4 LINKS"
+      }
+    },
+    "3rd_FLOOR_COLUMN": {
+      "C1": {
+        "SIZE": "330 X 1100",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C 4 SETS + 1 LINK"
+      },
+      "C2": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C2A": {
+        "SIZE": "300 X 970",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C3": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 10-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C4": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "14-20 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C5": {
+        "SIZE": "230 X 1330",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-20 TOR + 14-16 TOR",
+        "RING": "8 TOR 125 C/C 3 SETS + 3 LINKS"
+      },
+      "C8": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "17-20 TOR + 10-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 6 SETS + 3 LINKS"
+      },
+      "C7": {
+        "SIZE": "230 X 1075",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 6-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C 2 SETS + 3 LINKS"
+      },
+      "C10": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "14-25 TOR + 6-20 TOR",
+        "RING": "10 TOR 15 @ 75 + 0 115 + 15 @ 75 C/C 3 SETS + 4 LINKS"
+      },
+      "C11": {
+        "SIZE": "230 X 1220",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 10-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 4 LINKS"
+      }
+    },
+    "2nd_FLOOR_COLUMN": {
+      "C1": {
+        "SIZE": "330 X 1100",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 4 SETS + 1 LINK"
+      },
+      "C2": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C2A": {
+        "SIZE": "300 X 970",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C3": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C4": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "14-20 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C5": {
+        "SIZE": "230 X 1330",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 12-16 TOR",
+        "RING": "8 TOR @ 125 C/C, 3 SETS + 3 LINKS"
+      },
+      "C8": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "17-20 TOR + 10-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 6 SETS + 3 LINKS"
+      },
+      "C7": {
+        "SIZE": "230 X 1075",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "14-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C 2 SETS + 3 LINKS"
+      },
+      "C10": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "14-25 TOR + 8-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 3 SETS + 4 LINKS"
+      },
+      "C11": {
+        "SIZE": "230 X 1220",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "6-20 TOR + 10-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 4 LINKS"
+      }
+    },
+    "1st_FLOOR_COLUMN": {
+      "C1": {
+        "SIZE": "330 X 1100",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 6-16 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 4 SETS + 1 LINK"
+      },
+      "C2": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 4-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C2A": {
+        "SIZE": "300 X 970",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 4-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C3": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "8-20 TOR + 8-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C4": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-25 TOR + 10-20 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C5": {
+        "SIZE": "230 X 1330",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 8-16 TOR",
+        "RING": "8 TOR @ 125 C/C 3 SETS + 3 LINKS"
+      },
+      "C8": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "27-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C 6 SETS + 3 LINKS"
+      },
+      "C7": {
+        "SIZE": "230 X 1075",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "4-25 TOR + 10-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 3 LINKS"
+      },
+      "C10": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "20-25 TOR",
+        "RING": "10 TOR 15 @ 75 + 115 + 15 @ 75 C/C, 3 SETS + 4 LINKS"
+      },
+      "C11": {
+        "SIZE": "230 X 1220",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 6-16 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 4 LINKS"
+      }
+    },
+    "GROUND_FLOOR_COLUMN": {
+      "C1": {
+        "SIZE": "330 X 1100",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "10-20 TOR + 6-16 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 4 SETS + 1 LINK"
+      },
+      "C2": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "10-20 TOR + 4-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C2A": {
+        "SIZE": "300 X 970",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "+ 10-20 TOR + 4-16 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C3": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "14–20 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C4": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "8-25 TOR + 8-20 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C, 4 SETS"
+      },
+      "C5": {
+        "SIZE": "230 X 1330",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "18-20 TOR",
+        "RING": "8 TOR @ 125 C/C, 3 SETS + 3 LINKS"
+      },
+      "C8": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "27-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 6 SETS + 3 LINKS"
+      },
+      "C7": {
+        "SIZE": "230 X 1075",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "8-25 TOR + 8-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 3 LINKS"
+      },
+      "C10": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "+ 20-25 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C 3 SETS + 4 LINKS"
+      },
+      "C11": {
+        "SIZE": "230 X 1220",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "16-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 4 LINKS"
+      }
+    },
+    "BASE_FLOOR_COLUMN": {
+      "C1": {
+        "SIZE": "330 X 1100",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "16-20 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 4 SETS + 1 LINK"
+      },
+      "C2": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "14-20 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C2A": {
+        "SIZE": "350 X 970",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "14-20 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C3": {
+        "SIZE": "350 X 850",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "4-25 TOR + 10-20 TOR",
+        "RING": "8 TOR 12 @ 75 + @ 150 + 12 @ 75 C/C 4 SETS"
+      },
+      "C4": {
+        "SIZE": "350 X 1100",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "8-25 TOR + 11-20 TOR",
+        "RING": "8 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 5 SETS"
+      },
+      "C5": {
+        "SIZE": "230 X 1330",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "4-25 TOR + 14-20 TOR",
+        "RING": "8 TOR @ 125 C/C, 3 SETS + 3 LINKS"
+      },
+      "C8": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "27-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 150 + 15 @ 75 C/C, 6 SETS + 3 LINKS"
+      },
+      "C7": {
+        "SIZE": "230 X 1075",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "14-25 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C 2 SETS + 3 LINKS"
+      },
+      "C10": {
+        "SIZE": "L SHAPE",
+        "CONC_MIX": "M30",
+        "VERT_REINF": "24-25 TOR",
+        "RING": "10 TOR 15 @ 75 115 + 15 @ 75 C/C 3 SETS + 4 LINKS"
+      },
+      "C11": {
+        "SIZE": "230 X 1220",
+        "CONC_MIX": "M25",
+        "VERT_REINF": "16-20 TOR",
+        "RING": "10 TOR 15 @ 75 + @ 115 + 15 @ 75 C/C, 2 SETS + 4 LINKS"
+      }
+    }
+  }
+}
