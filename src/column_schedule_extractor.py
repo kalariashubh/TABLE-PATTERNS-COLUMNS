@@ -1,4 +1,4 @@
-# """
+# """ 
 # Generalized Column Schedule PDF Extraction Pipeline
 # ====================================================
 
