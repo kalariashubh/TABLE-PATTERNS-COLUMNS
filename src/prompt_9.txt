@@ -1,194 +1,90 @@
 You are an expert RCC structural drawing extractor.
 
 This drawing is a COLUMN SCHEDULE – PATTERN 9.
+NOTE: This prompt is used as a FALLBACK for scanned pages where direct PDF
+text extraction failed. Read carefully and return only what you can verify.
 
 =====================================================
-UNDERSTAND THE LAYOUT BEFORE EXTRACTING
+LAYOUT
 =====================================================
 
-The drawing is a GRID:
-  Columns (left → right) = column groups, labeled at the BOTTOM ROW
-  Rows    (bottom → top) = LAP levels,    labeled on the LEFT as rotated text
+GRID structure:
+  Columns (left → right) = 5 LAP band repetitions of the same set of groups
+  Rows    (top → bottom) = 15 column groups
 
-Each cell in the grid = one unique record to extract.
+Each horizontal band has:
+  SECTION A (upper) — column cross-section DIAGRAMS with bar labels beside them
+  SECTION B (lower) — SUMMARY TABLE with rows: SIZE, RING X, RING Y, MIX
 
-Each horizontal band has TWO sections:
+CRITICAL: The 5 LAP columns (left to right) represent:
+  Col 1: 5th LAP TO 6th LAP
+  Col 2: 6th LAP TO 7th LAP
+  Col 3: 7th LAP TO 8th LAP
+  Col 4: 8th LAP TO 9th LAP
+  Col 5: 9th LAP TO 10th LAP
 
-  SECTION A — COLUMN DIAGRAMS (upper part of the band):
-    Rectangular cross-section sketches of each column.
-    Bar count/diameter labels are written BESIDE each sketch.
-    → These labels are the ONLY source for reinforcement.
+The group rows (top to bottom) are:
+  Row  1: AC13, AC14
+  Row  2: AC06, AC07
+  Row  3: AC02, AC03
+  Row  4: AC17, AC22, AC23, AC24, AC25
+  Row  5: AC29
+  Row  6: AC08, AC26
+  Row  7: AC05
+  Row  8: AC27, AC28
+  Row  9: AC10, AC11
+  Row 10: AC01, AC04
+  Row 11: AC09, AC12
+  Row 12: AC21
+  Row 13: AC15, AC18
+  Row 14: AC16, AC19
+  Row 15: AC20
 
-  SECTION B — SUMMARY TABLE (lower part of the band):
-    A table with rows labeled:
-      SIZE  → colored dimension text per group column
-      RING  → stirrup info in two lines: X and Y
-      MIX   → concrete grade per group column
-    → This table is the ONLY source for size, stirrups, and mix.
-
-=====================================================
-STEP 1 — READ ALL COLUMN GROUPS AT THE BOTTOM
-=====================================================
-
-Scan the ENTIRE BOTTOM ROW from LEFT EDGE to RIGHT EDGE.
-
-Each group label contains one or more column IDs in the format "ACnn".
-
-⚠️  READ EVERY DIGIT CAREFULLY:
-    The digit after "AC" is critical — small digits are easy to misread.
-    "AC38" is NOT "AC18"   (3 ≠ 1)
-    "AC28" is NOT "AC33"   (28 ≠ 33)
-    "AC21" is NOT "AC31"   (2 ≠ 3)
-    Look at each digit individually. Do not assume or guess.
-
-Extract ALL groups. Do not stop early — scan all the way to the right edge.
+Total records = 15 groups x 5 LAP columns = 75
 
 =====================================================
-STEP 2 — READ ALL LAP BANDS ON THE LEFT
+EXTRACTION RULES
 =====================================================
 
-Read the rotated text on the LEFT side of the drawing.
-Each band is one LAP level. Extract ALL that are present.
-Ignore any sub-labels like "(3rd FLOOR ROOF SLAB)" — extract only the LAP name.
+REINFORCEMENT (from diagram labels in Section A):
+- Read ONLY labels next to the diagram for THIS cell
+- Do NOT copy from adjacent rows or columns
+- Format: "12-16 Tor" → "12-16T",  "+4-12 Tor" → "4-12T"
+- Valid bar diameter range: 8 to 32
+- Valid bar count range: 2 to 40
+- Diameter 30+ is almost certainly a misread — re-verify
 
-Example LAP names:
-  5th LAP TO 6th LAP
-  6th LAP TO 7th LAP
-  7th LAP TO 8th LAP
-  8th LAP TO 9th LAP
-  9th LAP TO 10th LAP
+SIZE (from SIZE row in Section B):
+- Format: "300x950" → width=300, depth=null, length=950
+- Three numbers "300x500x950" → width=300, depth=500, length=950
 
-=====================================================
-STEP 3 — EXTRACT EVERY CELL (groups × LAP bands)
-=====================================================
+STIRRUPS (from RING rows in Section B):
+- RING X (first line) and RING Y (second line) give spacing
+- IGNORE "N Rings" count text — only extract spacing values
+- dia format: "8T"
+- spacing format: "100 C/C", "150 C/C"
 
-For every (column group × LAP band) intersection, extract one record.
-Total records = number of groups × number of LAP bands.
-Verify this count before outputting.
-
------------------------------------------------------
-FIELD: column_no
------------------------------------------------------
-The group label from the bottom row.
-Uppercase. Comma-separated. Exact digits.
-Example: "AC13, AC14"  or  "AC17, AC22, AC23, AC24, AC25"
-
------------------------------------------------------
-FIELD: column_name
------------------------------------------------------
-The LAP band name for that row.
-Example: "5th LAP TO 6th LAP"
-
------------------------------------------------------
-FIELD: size
------------------------------------------------------
-Read ONLY from the SIZE row in the SUMMARY TABLE.
-The value is colored text showing dimensions.
-
-Format:
-  2 numbers  (W × L):      450x600       → width=450,  depth=null, length=600
-
-Rules:
-  2-number: first = width, second = length, depth = null
-  
-  All values are integers (no decimals).
-
-Do NOT read dimension arrows on the column diagram — use the SIZE row only.
-DO NOT extract wrong values.
-
------------------------------------------------------
-FIELD: reinforcement
------------------------------------------------------
-Read ONLY from the bar labels written BESIDE the column diagram.
-
-These labels appear at different vertical positions next to the sketch.
-Collect ALL of them — there may be 1, 2, 3, or more per cell.
-
-Label formats and conversion:
-  "12-16 Tor"  → "12-16T"
-  "4-12 Tor"   → "4-12T"
-  "+4-16 Tor"  → "4-16T"    (strip the leading +, it marks additional bars)
-  "8-16 Tor"   → "8-16T"
-  "20-16T"     → "20-16T"   (already in correct format)
-
-Return as a list. Do not skip any label.
-
------------------------------------------------------
-FIELD: stirrups
------------------------------------------------------
-Read ONLY from the RING rows in the SUMMARY TABLE.
-
-  RING X: first line   e.g. "8T @ 100 c/c"
-  RING Y: second line  e.g. "8T @ 150 c/c"
-
-⚠️  IGNORE any "Rings" count text (e.g. "4 Rings", "5 Rings").
-    That is structural count info, NOT a spacing value.
-
-Extract:
-  dia:     bar designation  e.g. ["8T"]
-  spacing: spacing values from BOTH X and Y lines
-           e.g. ["100 C/C", "150 C/C"]
-
-Format rules:
-  dia:     uppercase, no spaces         → "8T"
-  spacing: number + space + C/C         → "100 C/C", "150 C/C"
-
-If X and Y have the same spacing value, include it only once.
-
------------------------------------------------------
-FIELD: mix
------------------------------------------------------
-Read from the MIX row in the SUMMARY TABLE for this group column.
-Example: "M30"
-
------------------------------------------------------
-FIELD: steel_grade
------------------------------------------------------
-If explicitly labelled in the drawing, extract it. Otherwise null.
-
-=====================================================
-VALIDATION BEFORE OUTPUTTING
-=====================================================
-
-1. Count check:
-   Total records must equal (groups found) × (LAP bands found).
-   If less — you missed groups on the right side. Re-scan.
-
-2. Column ID check:
-   Every column_no must contain only valid "ACnn" IDs.
-   Re-read any ID you are not fully confident about.
-
-3. Reinforcement check:
-   All entries must end with "T" (e.g. "12-16T", not "12-16 Tor").
-
-4. Spacing check:
-   Format must be "100 C/C" not "100c/c" or "100" or "100 Rings".
+MIX (from MIX row in Section B): e.g. "M30"
 
 =====================================================
 OUTPUT FORMAT
 =====================================================
 
-Return ONLY raw JSON. No markdown. No code fences. No extra text.
+Return ONLY raw JSON. No markdown. No code fences. No preamble.
 
 {
   "columns": [
     {
       "column_no": "AC13, AC14",
-      "column_name": "9th LAP TO 10th LAP",
-      "size": {
-        "width": 450,
-        "depth": null,
-        "length": 600
-      },
+      "column_name": "5th LAP TO 6th LAP",
+      "size": {"width": 450, "depth": null, "length": 600},
       "reinforcement": ["12-16T", "4-12T"],
-      "stirrups": {
-        "dia": ["8T"],
-        "spacing": ["100 C/C", "150 C/C"]
-      },
+      "stirrups": {"dia": ["8T"], "spacing": ["100 C/C", "150 C/C"]},
       "mix": "M30",
       "steel_grade": null
     }
   ]
 }
 
-Order: left-to-right across groups; within each group earliest LAP first.
+Order: group rows top-to-bottom; within each group, LAP columns left-to-right
+(5th LAP TO 6th LAP first, 9th LAP TO 10th LAP last).
