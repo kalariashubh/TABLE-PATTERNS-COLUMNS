@@ -314,374 +314,6 @@
 
 
 
-# """
-# main_9.py  –  Pattern 9 column schedule extractor
-# ===================================================
-# Uses PyMuPDF to extract text with spatial coordinates directly from the PDF,
-# then assigns each word to its (group_row x lap_column) cell based on XY
-# position.  This eliminates vision-model hallucinations entirely.
-
-# Layout for Pattern 9:
-#   - 5 LAP-band columns left to right  (X centres ~269, 710, 1151, 1592, 2033)
-#   - 15 group rows top to bottom
-
-# Fallback: if a page has no extractable text (scanned image), the vision model
-# is used for that page only.
-# """
-
-# import os
-# import re
-# import json
-# from tqdm import tqdm
-# from collections import defaultdict
-
-# import fitz  # PyMuPDF  (pip install pymupdf)
-
-# from config import INPUT_DIR, OUTPUT_DIR
-# from pdf_to_images import convert_pdf_to_images
-# from vision_extractor import extract_from_image
-
-
-# # ─────────────────────────────────────────────────────────────────────────────
-# # Layout constants (calibrated from the actual PDF coordinate space)
-# # ─────────────────────────────────────────────────────────────────────────────
-
-# LAP_X_CENTERS = [269, 710, 1151, 1592, 2033]
-# LAP_X_HALF    = 210          # x-tolerance (half column width)
-
-# LAP_NAMES = [
-#     "5th LAP TO 6th LAP",
-#     "6th LAP TO 7th LAP",
-#     "7th LAP TO 8th LAP",
-#     "8th LAP TO 9th LAP",
-#     "9th LAP TO 10th LAP",
-# ]
-
-# GROUP_Y_CENTERS = [
-#     464,   # GROUP 1  – AC13, AC14
-#     643,   # GROUP 2  – AC06, AC07
-#     822,   # GROUP 3  – AC02, AC03
-#     1001,  # GROUP 4  – AC17, AC22, AC23, AC24, AC25
-#     1180,  # GROUP 5  – AC29
-#     1360,  # GROUP 6  – AC08, AC26
-#     1539,  # GROUP 7  – AC05
-#     1718,  # GROUP 8  – AC27, AC28
-#     1897,  # GROUP 9  – AC10, AC11
-#     2076,  # GROUP 10 – AC01, AC04
-#     2256,  # GROUP 11 – AC09, AC12
-#     2435,  # GROUP 12 – AC21
-#     2614,  # GROUP 13 – AC15, AC18
-#     2793,  # GROUP 14 – AC16, AC19
-#     2972,  # GROUP 15 – AC20
-# ]
-# GROUP_Y_HALF = 90            # y-tolerance (half row height)
-
-# GROUP_LABELS = [
-#     "AC13, AC14",
-#     "AC06, AC07",
-#     "AC02, AC03",
-#     "AC17, AC22, AC23, AC24, AC25",
-#     "AC29",
-#     "AC08, AC26",
-#     "AC05",
-#     "AC27, AC28",
-#     "AC10, AC11",
-#     "AC01, AC04",
-#     "AC09, AC12",
-#     "AC21",
-#     "AC15, AC18",
-#     "AC16, AC19",
-#     "AC20",
-# ]
-
-
-# # ─────────────────────────────────────────────────────────────────────────────
-# # Spatial helpers
-# # ─────────────────────────────────────────────────────────────────────────────
-
-# def find_lap_col(x: float) -> int:
-#     best_i, best_d = -1, float("inf")
-#     for i, cx in enumerate(LAP_X_CENTERS):
-#         d = abs(x - cx)
-#         if d < best_d:
-#             best_d, best_i = d, i
-#     return best_i if best_d <= LAP_X_HALF else -1
-
-
-# def find_group_row(y: float) -> int:
-#     best_i, best_d = -1, float("inf")
-#     for i, cy in enumerate(GROUP_Y_CENTERS):
-#         d = abs(y - cy)
-#         if d < best_d:
-#             best_d, best_i = d, i
-#     return best_i if best_d <= GROUP_Y_HALF else -1
-
-
-# def parse_size(s: str) -> dict:
-#     nums = [int(n) for n in re.findall(r"\d+", s)]
-#     if len(nums) == 2:
-#         return {"width": nums[0], "depth": None,    "length": nums[1]}
-#     if len(nums) == 3:
-#         return {"width": nums[0], "depth": nums[1], "length": nums[2]}
-#     return {"width": None, "depth": None, "length": None}
-
-
-# # ─────────────────────────────────────────────────────────────────────────────
-# # Core extractor – direct PDF text + coordinates
-# # ─────────────────────────────────────────────────────────────────────────────
-
-# def extract_from_pdf_page(page) -> list:
-#     """
-#     Parse a fitz page object and return a list of column-schedule records.
-#     Returns an empty list if the page has no usable text (scanned).
-#     """
-#     words = page.get_text("words")  # list of (x0,y0,x1,y1,text,block,line,word)
-#     if not words:
-#         return []
-
-#     n_g = len(GROUP_LABELS)
-#     n_l = len(LAP_NAMES)
-
-#     # Per-cell accumulators
-#     reinf   = {(g, l): [] for g in range(n_g) for l in range(n_l)}
-#     sizes   = {}
-#     dia_acc = {(g, l): [] for g in range(n_g) for l in range(n_l)}
-#     sp_acc  = {(g, l): [] for g in range(n_g) for l in range(n_l)}
-#     mix_acc = {}
-
-#     for entry in words:
-#         x0, y0, x1, y1, txt = entry[0], entry[1], entry[2], entry[3], entry[4]
-#         x = (x0 + x1) / 2
-#         y = (y0 + y1) / 2
-#         li = find_lap_col(x)
-#         gi = find_group_row(y)
-#         if li < 0 or gi < 0:
-#             continue
-#         key = (gi, li)
-
-#         # Reinforcement: "12-16" or "+4-12"
-#         if re.match(r"^\+?\d+-\d+$", txt):
-#             clean = re.sub(r"^\+", "", txt) + "T"
-#             if clean not in reinf[key]:
-#                 reinf[key].append(clean)
-
-#         # Size: "300x950" or "300x500x950"
-#         elif re.match(r"^\d+x\d+", txt):
-#             sizes[key] = txt
-
-#         # Stirrup bar designation: "8T"
-#         elif re.match(r"^\d+T$", txt):
-#             if txt not in dia_acc[key]:
-#                 dia_acc[key].append(txt)
-
-#         # Stirrup spacing value
-#         elif txt in ("100", "150"):
-#             sp = f"{txt} C/C"
-#             if sp not in sp_acc[key]:
-#                 sp_acc[key].append(sp)
-
-#         # Concrete mix
-#         elif re.match(r"^M\d+$", txt):
-#             mix_acc[key] = txt
-
-#     records = []
-#     for gi, grp in enumerate(GROUP_LABELS):
-#         for li, lap in enumerate(LAP_NAMES):
-#             key = (gi, li)
-#             if key not in sizes:
-#                 continue   # no data for this cell
-#             records.append({
-#                 "column_no":    grp,
-#                 "column_name":  lap,
-#                 "size":         parse_size(sizes[key]),
-#                 "reinforcement": reinf[key],
-#                 "stirrups": {
-#                     "dia":     dia_acc[key],
-#                     "spacing": sorted(sp_acc[key]),
-#                 },
-#                 "mix":          mix_acc.get(key),
-#                 "steel_grade":  None,
-#             })
-#     return records
-
-
-# # ─────────────────────────────────────────────────────────────────────────────
-# # Vision-model fallback (scanned pages only)
-# # ─────────────────────────────────────────────────────────────────────────────
-
-# def load_prompt():
-#     with open(
-#         os.path.join(os.path.dirname(__file__), "prompt_9.txt"),
-#         "r", encoding="utf-8",
-#     ) as f:
-#         return f.read()
-
-
-# def parse_model_output(raw: str) -> dict:
-#     text = raw.strip()
-#     if "```" in text:
-#         parts = text.split("```")
-#         if len(parts) >= 3:
-#             block = parts[1]
-#             if block.lower().startswith("json"):
-#                 block = block[4:]
-#             text = block.strip()
-#     brace = text.find("{")
-#     if brace > 0:
-#         text = text[brace:]
-#     return json.loads(text)
-
-
-# def _norm_reinf_entry(r):
-#     r = re.sub(r"^\++", "", str(r).strip())
-#     r = re.sub(r"\s*[Tt][Oo][Rr]\s*$", "T", r)
-#     r = r.replace(" ", "")
-#     m = re.match(r"^(\d+)-(\d+)T$", r)
-#     return f"{int(m.group(1))}-{int(m.group(2))}T" if m else None
-
-
-# def _norm_reinf(lst):
-#     seen = []
-#     for r in (lst or []):
-#         n = _norm_reinf_entry(r)
-#         if n and n not in seen and int(n.split("-")[0]) <= 40 and int(n.split("-")[1][:-1]) <= 40:
-#             seen.append(n)
-#     return seen
-
-
-# def _norm_stirrups(s):
-#     if not s or not isinstance(s, dict):
-#         return {"dia": [], "spacing": []}
-#     dia = [re.sub(r"\s*[Tt][Oo][Rr]\s*", "T", str(d).strip()).replace(" ", "")
-#            for d in (s.get("dia", []) if isinstance(s.get("dia"), list) else [s.get("dia")])]
-#     dia = list(dict.fromkeys(filter(None, dia)))
-#     sp_out = []
-#     for sp in (s.get("spacing", []) if isinstance(s.get("spacing"), list) else [s.get("spacing")]):
-#         sp = str(sp).strip()
-#         if re.search(r"[Rr]ing", sp):
-#             continue
-#         sp = re.sub(r"^@\s*", "", sp.upper()).replace(" ", "")
-#         sp = f"{sp} C/C" if re.match(r"^\d+$", sp) else re.sub(r"C/C$", " C/C", sp).strip()
-#         if sp and sp not in sp_out:
-#             sp_out.append(sp)
-#     return {"dia": dia, "spacing": sp_out}
-
-
-# def post_process_vision(columns: list) -> list:
-#     out = []
-#     for col in columns:
-#         if not isinstance(col, dict):
-#             continue
-#         col_no = str(col.get("column_no", "")).strip().upper()
-#         parts  = [p.strip() for p in re.split(r"[,;]+", col_no)]
-#         if not any(p.startswith("AC") for p in parts):
-#             continue
-#         col["column_no"]   = ", ".join(parts)
-#         col["column_name"] = str(col.get("column_name", "")).strip()
-#         col["size"]        = parse_size(str(col.get("size", ""))) if isinstance(col.get("size"), str) \
-#                              else {k: (int(v) if v else None) for k, v in (col.get("size") or {}).items()}
-#         col["reinforcement"] = _norm_reinf(col.get("reinforcement", []))
-#         col["stirrups"]    = _norm_stirrups(col.get("stirrups"))
-#         col["mix"]         = str(col.get("mix", "")).strip().upper() or None
-#         col["steel_grade"] = col.get("steel_grade")
-#         out.append(col)
-#     return out
-
-
-# # ─────────────────────────────────────────────────────────────────────────────
-# # Merge + sort + report
-# # ─────────────────────────────────────────────────────────────────────────────
-
-# def merge_pages(all_records: list) -> list:
-#     seen = {}
-#     for rec in all_records:
-#         key = (rec["column_no"], rec["column_name"])
-#         seen[key] = rec   # last page wins (dedup across pages)
-#     return list(seen.values())
-
-
-# def sort_records(records: list) -> list:
-#     grp_order = {g: i for i, g in enumerate(GROUP_LABELS)}
-#     lap_order = {l: i for i, l in enumerate(LAP_NAMES)}
-
-#     def key(rec):
-#         return (
-#             grp_order.get(rec["column_no"], 99),
-#             lap_order.get(rec["column_name"], 99),
-#         )
-#     return sorted(records, key=key)
-
-
-# def report_completeness(records: list):
-#     groups   = defaultdict(set)
-#     all_laps = set()
-#     for r in records:
-#         groups[r["column_no"]].add(r["column_name"])
-#         all_laps.add(r["column_name"])
-#     print(f"\n📊 Extraction summary:")
-#     print(f"   Groups : {len(groups)} | LAP bands : {len(all_laps)}")
-#     print(f"   Expected : {len(groups) * len(all_laps)} | Actual : {len(records)}\n")
-#     for grp, found in groups.items():
-#         missing = all_laps - found
-#         if missing:
-#             print(f"   ⚠️  {grp} missing LAPs: {sorted(missing)}")
-
-
-# # ─────────────────────────────────────────────────────────────────────────────
-# # Main pipeline
-# # ─────────────────────────────────────────────────────────────────────────────
-
-# def process_pdf(pdf_path: str):
-#     file_name     = os.path.splitext(os.path.basename(pdf_path))[0]
-#     output_folder = os.path.join(OUTPUT_DIR, file_name)
-#     os.makedirs(output_folder, exist_ok=True)
-
-#     doc         = fitz.open(pdf_path)
-#     all_records = []
-#     prompt      = None   # load lazily
-
-#     for page_no in tqdm(range(len(doc)), desc=f"Processing {file_name}"):
-#         page    = doc[page_no]
-#         records = extract_from_pdf_page(page)
-
-#         if records:
-#             print(f"  ✅ Page {page_no + 1}: {len(records)} records via PDF text")
-#             all_records.extend(records)
-#         else:
-#             print(f"  ⚠️  Page {page_no + 1}: no text – trying vision model…")
-#             if prompt is None:
-#                 prompt = load_prompt()
-#             image_paths = convert_pdf_to_images(pdf_path, output_folder, dpi=300)
-#             if page_no < len(image_paths):
-#                 raw = extract_from_image(image_paths[page_no], prompt)
-#                 try:
-#                     parsed  = parse_model_output(raw)
-#                     vision  = post_process_vision(parsed.get("columns", []))
-#                     all_records.extend(vision)
-#                     print(f"     Vision: {len(vision)} records")
-#                 except Exception as e:
-#                     print(f"     ❌ Vision parse failed: {e}")
-#                     print(f"        Raw (first 400): {raw[:400]}")
-
-#     final = sort_records(merge_pages(all_records))
-#     report_completeness(final)
-
-#     output_file = os.path.join(output_folder, f"{file_name}.json")
-#     with open(output_file, "w", encoding="utf-8") as f:
-#         json.dump({"columns": final}, f, indent=2, ensure_ascii=False)
-#     print(f"✅ Saved → {output_file}")
-
-
-# def main():
-#     os.makedirs(OUTPUT_DIR, exist_ok=True)
-#     for pdf in [f for f in os.listdir(INPUT_DIR) if f.lower().endswith(".pdf")]:
-#         process_pdf(os.path.join(INPUT_DIR, pdf))
-
-
-# if __name__ == "__main__":
-#     main()
-
-
 """
 main_9_generalized.py — Generalized Column Schedule Extractor
 =============================================================
@@ -760,6 +392,23 @@ def nearest_index(value: float, centers: list, half_width: float) -> int:
             best_d, best_i = d, i
     return best_i if best_d <= half_width else -1
 
+def nearest_index_y_asymmetric(y, centers, y_above, y_below):
+    """
+    y_above = max distance ABOVE centre (visually up = smaller Y in PDF)
+    y_below = max distance BELOW centre (visually down = larger Y in PDF)
+    """
+    best_i, best_d = -1, float("inf")
+    for i, c in enumerate(centers):
+        diff = y - c  # positive = below centre, negative = above centre
+        if diff < 0:   # word is ABOVE centre
+            if abs(diff) > y_above:
+                continue
+        else:           # word is BELOW centre
+            if diff > y_below:
+                continue
+        if abs(diff) < best_d:
+            best_d, best_i = abs(diff), i
+    return best_i
 
 def cluster_1d(positions: list) -> list:
     """
@@ -850,7 +499,7 @@ def _detect_grid_centres(words: list):
     """
     Cluster the X and Y midpoints of every SIZE token to discover
     LAP-column X centres and group-row Y centres.
-    Returns (x_centres, y_centres) — both sorted ascending.
+    Returns (x_centres, centres) — both sorted ascending.
     """
     xs, ys = [], []
     for x0, y0, x1, y1, txt in words:
@@ -860,7 +509,7 @@ def _detect_grid_centres(words: list):
     return cluster_1d(xs), cluster_1d(ys)
 
 
-def _detect_lap_names(words: list, x_centres: list, x_half: float) -> dict:
+def _detect_lap_names(words, x_centres, x_half, use_axis="x"):
     """
     Reconstruct "Xth LAP TO Yth LAP" phrases from word-level tokens and
     assign each phrase to the nearest detected X centre.
@@ -895,7 +544,6 @@ def _detect_lap_names(words: list, x_centres: list, x_half: float) -> dict:
 
             if x_mins:
                 xc = (min(x_mins) + max(x_maxs)) / 2
-                phrase_positions.setdefault((n1, n2), []).append(xc)
 
     # Average x positions across pages for each phrase
     phrase_avg = {key: sum(v) / len(v) for key, v in phrase_positions.items()}
@@ -919,7 +567,7 @@ def _detect_lap_names(words: list, x_centres: list, x_half: float) -> dict:
     return idx_to_name
 
 
-def _detect_group_labels(words: list, y_centres: list, y_half: float) -> dict:
+def _detect_group_labels(words, centres, half, use_axis="y"):
     """
     Collect "AC\\d+" tokens that appear in the left portion of the page,
     cluster them by Y position, and assign each cluster to the nearest
@@ -929,7 +577,12 @@ def _detect_group_labels(words: list, y_centres: list, y_half: float) -> dict:
     ac_items = []  # (y_centre, label_upper, x_centre)
     for x0, y0, x1, y1, txt in words:
         if _AC_RE.match(txt):
-            ac_items.append(((y0 + y1) / 2, txt.upper(), (x0 + x1) / 2))
+            if use_axis == "y":
+                coord = (y0 + y1) / 2
+            else:
+                coord = (x0 + x1) / 2
+
+            ac_items.append((coord, txt.upper(), (x0 + x1) / 2))
 
     if not ac_items:
         return {}
@@ -953,14 +606,14 @@ def _detect_group_labels(words: list, y_centres: list, y_half: float) -> dict:
     # Assign each AC label to its nearest raw cluster
     cluster_labels: dict[int, list] = defaultdict(list)
     for y, lbl in left:
-        ci = nearest_index(y, raw_cluster_centres, y_half * 1.5)
+        ci = nearest_index(y, raw_cluster_centres, half * 1.5)
         if ci >= 0:
             cluster_labels[ci].append(lbl)
 
     # Map raw cluster → detected y_centre → row index
     idx_to_name = {}
     for ci, yc in enumerate(raw_cluster_centres):
-        ri = nearest_index(yc, y_centres, y_half * 1.5)
+        ri = nearest_index(yc, centres, half * 1.5)
         if ri < 0 or ri in idx_to_name:
             continue
         labels = sorted(
@@ -972,45 +625,84 @@ def _detect_group_labels(words: list, y_centres: list, y_half: float) -> dict:
 
     return idx_to_name
 
+def _detect_orientation(words: list) -> str:
+    group_xs = [(x0 + x1)/2 for x0,y0,x1,y1,txt in words if txt.strip().upper() == "GROUP"]
+    group_ys = [(y0 + y1)/2 for x0,y0,x1,y1,txt in words if txt.strip().upper() == "GROUP"]
+
+    if len(group_xs) < 2:
+        return "Y"
+
+    x_spread = max(group_xs) - min(group_xs)
+    y_spread = max(group_ys) - min(group_ys) if len(group_ys) > 1 else 0
+
+    return "X" if x_spread > y_spread else "Y"
 
 def detect_layout(doc: fitz.Document) -> dict:
-    """
-    Scan the entire document and return a fully-populated layout dict:
-
-        lap_x_centres   : list[float]  — X positions of LAP columns (sorted)
-        lap_names       : list[str]    — name for each LAP column
-        lap_x_half      : float        — ½-width tolerance for X assignment
-        group_y_centres : list[float]  — Y positions of group rows (sorted)
-        group_labels    : list[str]    — label for each group row
-        group_y_half    : float        — ½-height tolerance for Y assignment
-    """
     words = _get_all_words(doc)
 
-    # ── Step 1: grid centres from SIZE text ──────────────────────────────────
-    lap_x, grp_y = _detect_grid_centres(words)
+    x_raw, y_raw = _detect_grid_centres(words)
+    orientation  = _detect_orientation(words)
 
-    if not lap_x or not grp_y:
+    if orientation == "X":
+        grp_centres = x_raw
+        lap_centres = y_raw
+        lap_axis = "y"
+        grp_axis = "x"
+    else:
+        lap_centres = x_raw
+        grp_centres = y_raw
+        lap_axis = "x"
+        grp_axis = "y"
+
+    if not x_raw or not y_raw:
         print("  ⚠️  No SIZE text found — PDF may be fully scanned (image-only).")
         return {}
 
-    x_half = _median_spacing(lap_x) * 0.48
-    y_half = _median_spacing(grp_y) * 0.48
+    lap_half = _median_spacing(lap_centres) * 0.48
+    half     = _median_spacing(grp_centres) * 0.48
 
-    # ── Step 2: assign human-readable names ──────────────────────────────────
-    lap_name_map   = _detect_lap_names  (words, lap_x, x_half)
-    group_name_map = _detect_group_labels(words, grp_y, y_half)
+    if lap_axis == "y":
+        # LAPs vary vertically → SIZE is at bottom of each LAP row → asymmetry on Y
+        lap_above = _median_spacing(lap_centres) * 0.73
+        lap_below = _median_spacing(lap_centres) * 0.25
+        grp_above = half    # groups are horizontal → keep symmetric
+        grp_below = half
+    else:
+        # GROUPs vary vertically → SIZE is at bottom of each GROUP row → asymmetry on Y
+        lap_above = lap_half  # laps are horizontal → keep symmetric
+        lap_below = lap_half
+        grp_above = _median_spacing(grp_centres) * 0.73
+        grp_below = _median_spacing(grp_centres) * 0.25
 
-    lap_names    = [lap_name_map  .get(i, f"LAP {i + 1}")   for i in range(len(lap_x))]
-    group_labels = [group_name_map.get(i, f"GROUP {i + 1}") for i in range(len(grp_y))]
+    lap_name_map   = _detect_lap_names   (words, lap_centres, lap_half, use_axis=lap_axis)
+    group_name_map = _detect_group_labels(words, grp_centres, half,     use_axis=grp_axis)
+
+    lap_names    = [lap_name_map  .get(i, "LAP "   + str(i + 1)) for i in range(len(lap_centres))]
+    group_labels = [group_name_map.get(i, "GROUP " + str(i + 1)) for i in range(len(grp_centres))]
 
     return {
-        "lap_x_centres":   lap_x,
-        "lap_names":       lap_names,
-        "lap_x_half":      x_half,
-        "group_y_centres": grp_y,
-        "group_labels":    group_labels,
-        "group_y_half":    y_half,
-    }
+    "orientation":   orientation,
+
+    "lap_centres":   lap_centres,
+    "lap_names":     lap_names,
+    "lap_half":      lap_half,
+    "lap_axis":      lap_axis,
+    "lap_above":     lap_above,    # ← ADD THIS
+    "lap_below":     lap_below,    # ← ADD THIS
+
+    "grp_centres":   grp_centres,
+    "group_labels":  group_labels,
+    "half":          half,
+    "grp_axis":      grp_axis,
+    "grp_above":     grp_above,
+    "grp_below":     grp_below,
+
+    # backward compatibility aliases
+    "lap_x_centres": lap_centres,
+    "lap_x_half":    lap_half,
+    "group_centres": grp_centres,
+    "group_y_half":  half,
+}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1027,12 +719,12 @@ def extract_from_pdf_page(page: fitz.Page, layout: dict) -> list:
     if not words:
         return []
 
-    lap_x  = layout["lap_x_centres"]
+    lap_centres  = layout["lap_x_centres"]
     lap_n  = layout["lap_names"]
-    grp_y  = layout["group_y_centres"]
+    grp_centres  = layout["group_centres"]
     grp_n  = layout["group_labels"]
-    x_half = layout["lap_x_half"]
-    y_half = layout["group_y_half"]
+    lap_half = layout["lap_x_half"]
+    half = layout["group_y_half"]
     n_g, n_l = len(grp_n), len(lap_n)
 
     # Per-cell accumulators
@@ -1047,8 +739,20 @@ def extract_from_pdf_page(page: fitz.Page, layout: dict) -> list:
         x = (x0 + x1) / 2
         y = (y0 + y1) / 2
 
-        li = nearest_index(x, lap_x, x_half)
-        gi = nearest_index(y, grp_y, y_half)
+        lap_coord = y if layout.get("lap_axis") == "y" else x
+        grp_coord = x if layout.get("grp_axis") == "x" else y
+
+        if layout.get("lap_axis") == "y":
+            li = nearest_index_y_asymmetric(lap_coord, layout["lap_centres"],
+                                            layout["lap_above"], layout["lap_below"])
+        else:
+            li = nearest_index(lap_coord, layout["lap_centres"], layout["lap_half"])
+
+        if layout.get("grp_axis") == "y":
+            gi = nearest_index_y_asymmetric(grp_coord, layout["grp_centres"],
+                                            layout["grp_above"], layout["grp_below"])
+        else:
+            gi = nearest_index(grp_coord, layout["grp_centres"], layout["half"])
         if li < 0 or gi < 0:
             continue
         key = (gi, li)
@@ -1319,8 +1023,13 @@ def process_pdf(pdf_path: str):
         # Fully scanned PDF — vision on every page with a generic prompt
         layout = {
             "lap_x_centres":   [], "lap_names":    [],
-            "lap_x_half":      200, "group_y_centres": [],
+            "lap_x_half":      200, "group_centres": [],
             "group_labels":    [], "group_y_half": 100,
+            "lap_centres": [], "lap_half": 200,
+            "grp_centres": [], "half": 100,
+            "grp_above": 120, "grp_below": 70,
+            "lap_above": 156, "lap_below": 36,   # ← ADD THIS LINE
+            "lap_axis": "x", "grp_axis": "y",
         }
 
     print(f"  LAP columns ({len(layout['lap_names'])}): {layout['lap_names']}")
@@ -1378,5 +1087,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
