@@ -493,7 +493,6 @@ def extract_from_pdf_page_10(page: fitz.Page, layout: dict) -> list:
         for ci in range(n_cols):
             key        = (ri, ci)
             links_text = " ".join(links_acc.get(key, []))
-            print("FINAL LINKS TEXT:", links_text)
             stirrups   = parse_links(links_text) if links_text else {"dia": "", "spacing": ""}
             records.append({
                 "column_no":     col_names[ci],
