@@ -1,6 +1,6 @@
 """
-visualize_cells.py — Draw extraction rectangles on PDF pages
-============================================================
+visualize_cells.py — Draw extraction rectangles on PDF pages for PATTERN-9
+==========================================================================
 For each detected (lap_column × group_row) cell, draws the exact
 rectangle that the extractor uses to capture words — so you can
 visually verify the grid alignment before running the full extract.
