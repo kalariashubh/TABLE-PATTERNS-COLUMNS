@@ -105,19 +105,23 @@ def _reconcile_rows(raw_clusters: list, n_floors: int):
     If SIZE detection accidentally fires on multiple sub-rows, cluster_1d may
     return 27 clusters instead of 9.  Downsample by taking every k-th cluster.
 
-    Returns (size_row_centres, sub_spacing).
+    Returns (size_row_centres, sub_spacing, was_reconciled).
+      was_reconciled = True  → sub-rows were detected and downsampled;
+                               caller should apply y_shift = sub_spacing.
+      was_reconciled = False → clusters already match floor count;
+                               caller should use y_shift = 0.
     """
     sub_spacing = _median_spacing(raw_clusters)
     n = len(raw_clusters)
     if n_floors <= 0 or n <= n_floors:
-        return raw_clusters, sub_spacing
+        return raw_clusters, sub_spacing, False      # no downsampling needed
     step = round(n / n_floors)
     if step < 2:
-        return raw_clusters, sub_spacing
+        return raw_clusters, sub_spacing, False
     row_centres = raw_clusters[::step][:n_floors]
     print(f"  Reconciled {n} raw Y clusters → {len(row_centres)} floor rows "
           f"(step={step}, sub_spacing={sub_spacing:.1f} pt)")
-    return row_centres, sub_spacing
+    return row_centres, sub_spacing, True             # downsampled: sub-rows found
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -161,25 +165,42 @@ def parse_reinforcement(txt: str) -> list:
 
 def parse_links(txt: str) -> dict:
     """
-    'LOC 1:-T10 -100 AND LOC 2:-T8 -150'
+    Parse LINKS text in any of these formats:
+      'LOC 1:-T10 -100 AND LOC 2:-T8 -150'    (spaces)
+      'LOC:-T12-125 AND LOC:-T8-150'           (no spaces)
+      'LOC 1:-T10-100 AND LOC 2:-T8-150'       (mixed)
+      'T10@100 AND T8@150'                     (@ separator)
+
     →  {dia: ['T10','T8'], spacing: ['100 C/C','150 C/C']}
+
+    Strategy:
+      • Diameter  — first "T<digits>" in each AND-segment
+      • Spacing   — the LAST "[-@]<2-4 digits>" in each AND-segment
+                    that is NOT immediately followed by another digit
+                    and falls in the range 50–500
+                    (the LAST match avoids catching T12 in "-T12-125")
     """
     segments  = re.split(r"\bAND\b", txt, flags=re.IGNORECASE)
     dias: list     = []
     spacings: list = []
     for seg in segments:
+        # ── Diameter ─────────────────────────────────────────────────────────
         dm = re.search(r"T(\d+)", seg, re.IGNORECASE)
         if dm:
             t = f"T{dm.group(1)}"
             if t not in dias:
                 dias.append(t)
-        sm = re.search(r"[-@]\s*(\d{2,3})(?:\s|$|-)", seg)
-        if sm:
-            val = int(sm.group(1))
+
+        # ── Spacing — find ALL candidate matches, take the LAST one ──────────
+        # Pattern: dash or @, optional spaces, 2-4 digits NOT followed by digit
+        candidates = list(re.finditer(r"[-@]\s*(\d{2,4})(?!\d)", seg))
+        for m in reversed(candidates):
+            val = int(m.group(1))
             if 50 <= val <= 500:
                 sp = f"{val} C/C"
                 if sp not in spacings:
                     spacings.append(sp)
+                break   # one spacing per AND-segment
     return {"dia": dias, "spacing": spacings}
 
 
@@ -339,7 +360,7 @@ def detect_layout_10(doc: fitz.Document, pdf_path: str) -> dict:
         return {}
 
     # ── Reconcile sub-row clusters → floor-level row centres ─────────────────
-    size_row_centres, sub_spacing = _reconcile_rows(raw_row_ys, n_floors)
+    size_row_centres, sub_spacing, was_reconciled = _reconcile_rows(raw_row_ys, n_floors)
 
     # ── Spacing + window — SAME FORMULA as pattern-9 ─────────────────────────
     col_spacing  = _median_spacing(col_centres)
@@ -348,16 +369,16 @@ def detect_layout_10(doc: fitz.Document, pdf_path: str) -> dict:
     col_half = col_spacing * 0.48      # pattern-9: lap_half = spacing * 0.48
     y_half   = row_spacing * 0.48      # pattern-9: half     = spacing * 0.48
 
-    # y_shift: shift the Y coord by one sub-row before nearest_index lookup.
-    # This makes the effective window centre land on the STEEL row (mid sub-row)
-    # so SIZE (-sub_spacing) and LINKS (+sub_spacing) are equidistant from it.
+    # y_shift: only shift if sub-rows were actually detected and downsampled.
+    #   was_reconciled=True  → SIZE is at the TOP of a 3-sub-row cell;
+    #                          shift by sub_spacing to land window on STEEL (mid).
+    #   was_reconciled=False → clusters already represent floor centres directly;
+    #                          no shift needed (SIZE IS the row centre).
     # Pattern-9 equivalent: gi = nearest_index(grp_coord - shift, grp_centres, half)
-    y_shift = sub_spacing   # one sub-row down ≈ 33 pt
-
-    # Safety check: if sub_spacing is implausibly large (reconciliation wrong)
-    if sub_spacing > row_spacing * 0.6:
-        y_shift = row_spacing / 3.0
-        print(f"  ⚠️  y_shift reset to row_spacing/3 = {y_shift:.1f} pt")
+    if was_reconciled:
+        y_shift = sub_spacing   # one sub-row down ≈ 33 pt
+    else:
+        y_shift = 0.0           # SIZE is already at the row centre
 
     print(
         f"  col_spacing={col_spacing:.1f}  row_spacing={row_spacing:.1f}  "
@@ -465,20 +486,19 @@ def extract_from_pdf_page_10(page: fitz.Page, layout: dict) -> list:
             mix_acc[key] = line_text.strip().upper()
 
     # ── Step 3: assemble records ──────────────────────────────────────────────
+    # Every (row, col) pair is always emitted — empty cells get null values so
+    # the output preserves the full grid sequence.
     records = []
+    _null_size = {"width": None, "depth": None, "length": None}
     for ri in range(n_rows):
         for ci in range(n_cols):
-            key = (ri, ci)
-            if key not in size_acc:
-                continue
-
+            key        = (ri, ci)
             links_text = " ".join(links_acc.get(key, []))
-            stirrups   = parse_links(links_text) if links_text else {"dia": [], "spacing": []}
-
+            stirrups   = parse_links(links_text) if links_text else {"dia": "", "spacing": ""}
             records.append({
                 "column_no":     col_names[ci],
                 "column_name":   row_names[ri],
-                "size":          size_acc[key],
+                "size":          size_acc.get(key, _null_size),
                 "reinforcement": reinf_acc.get(key, []),
                 "stirrups":      stirrups,
                 "mix":           mix_acc.get(key),
