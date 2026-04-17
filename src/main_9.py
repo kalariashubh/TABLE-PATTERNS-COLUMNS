@@ -1,37 +1,3 @@
-"""
-main_9_generalized.py — Generalized Column Schedule Extractor
-=============================================================
-Automatically detects the grid layout (number of LAP columns × group rows,
-their X/Y coordinates, and their names) directly from the PDF content.
-
-No hardcoded coordinates, no hardcoded labels — works with any PDF that
-follows the same structural column-schedule format, regardless of how many
-LAP bands or column groups it contains.
-
-Detection Strategy
-------------------
-1.  Grid centres from SIZE text  (most reliable):
-        SIZE tokens like "300x950" appear exactly once per cell.
-        → Cluster their X positions  →  LAP column X centres
-        → Cluster their Y positions  →  Group row Y centres
-
-2.  LAP names  (matched by regex):
-        Scan all lines for "Xth LAP TO Yth LAP" phrases and assign each
-        phrase to its nearest detected X centre.
-
-3.  Group labels  (matched by regex):
-        Scan for "AC\\d+" tokens that appear in the left portion of the page,
-        cluster them by Y, and assign each cluster to its nearest Y centre.
-
-4.  Fallback generic names:
-        If a position cannot be matched to real text, it gets a generic label
-        ("LAP 1", "LAP 2", … / "GROUP 1", "GROUP 2", …).
-
-5.  Vision-model fallback:
-        Pages with no extractable text (scanned images) fall back to the
-        vision model with a dynamically built prompt.
-"""
-
 import os
 import re
 import json
