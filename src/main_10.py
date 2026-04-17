@@ -1,26 +1,3 @@
-"""
-main_10.py  —  Pattern-10 Column Schedule Extractor
-====================================================
-Mirrors pattern-9 logic exactly:
-
-  PATTERN-9                          PATTERN-10
-  ─────────────────────────────────  ──────────────────────────────────────
-  SIZE token = "300x950" (1 word)    SIZE span  = "300 X 1150" (3 tokens)
-  anchor = SIZE token midpoint (X,Y) anchor = span midpoint (X), SIZE-row Y
-  row_centres = Y of SIZE token      row_centres = Y of SIZE row (top of cell)
-  nearest_index(y - shift, …)        nearest_index(y - y_shift, …)
-  shift = half * 0.5                 y_shift = sub_spacing  (1 sub-row down)
-
-The y_shift converts "SIZE row Y" anchors into effective "STEEL row" anchors
-so the symmetric window (±y_half) covers all three sub-rows:
-   SIZE  at  anchor - sub_spacing   (distance = sub_spacing ≈ 33 pt)
-   STEEL at  anchor + 0             (distance = 0)
-   LINKS at  anchor + sub_spacing   (distance = sub_spacing ≈ 33 pt)
-Both are < y_half ≈ 47 pt → all captured.  Next floor SIZE at +99 pt → NOT captured.
-
-Column/floor labels come from GPT-4.1-mini vision (they are rasterised images).
-"""
-
 import os
 import re
 import json
