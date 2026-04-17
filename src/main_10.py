@@ -1,533 +1,570 @@
+"""
+main_10.py  —  Pattern-10 Column Schedule Extractor
+====================================================
+Mirrors pattern-9 logic exactly:
+
+  PATTERN-9                          PATTERN-10
+  ─────────────────────────────────  ──────────────────────────────────────
+  SIZE token = "300x950" (1 word)    SIZE span  = "300 X 1150" (3 tokens)
+  anchor = SIZE token midpoint (X,Y) anchor = span midpoint (X), SIZE-row Y
+  row_centres = Y of SIZE token      row_centres = Y of SIZE row (top of cell)
+  nearest_index(y - shift, …)        nearest_index(y - y_shift, …)
+  shift = half * 0.5                 y_shift = sub_spacing  (1 sub-row down)
+
+The y_shift converts "SIZE row Y" anchors into effective "STEEL row" anchors
+so the symmetric window (±y_half) covers all three sub-rows:
+   SIZE  at  anchor - sub_spacing   (distance = sub_spacing ≈ 33 pt)
+   STEEL at  anchor + 0             (distance = 0)
+   LINKS at  anchor + sub_spacing   (distance = sub_spacing ≈ 33 pt)
+Both are < y_half ≈ 47 pt → all captured.  Next floor SIZE at +99 pt → NOT captured.
+
+Column/floor labels come from GPT-4.1-mini vision (they are rasterised images).
+"""
+
 import os
 import re
 import json
+import tempfile
+from collections import defaultdict
 from tqdm import tqdm
-from collections import defaultdict, OrderedDict
+
+import fitz  # PyMuPDF
+
 from config import INPUT_DIR, OUTPUT_DIR
 from pdf_to_images import convert_pdf_to_images
 from vision_extractor import extract_from_image
 
-def load_prompt():
-    with open(
-        os.path.join(os.path.dirname(__file__), "prompt_10.txt"),
-        "r",
-        encoding="utf-8"
-    ) as f:
-        return f.read()
 
-def extract_from_pdf_text(pdf_path):
-    """
-    Parse the column schedule table directly from PDF text.
-    This is far more reliable than vision for tabular text PDFs.
-    Returns list of column dicts or None if parsing fails.
-    """
-    import subprocess
+# ─────────────────────────────────────────────────────────────────────────────
+# Regexes
+# ─────────────────────────────────────────────────────────────────────────────
 
-    result = subprocess.run(
-        ["pdftotext", "-layout", pdf_path, "-"],
-        capture_output=True, text=True
-    )
-    if result.returncode != 0 or not result.stdout.strip():
-        return None
-
-    raw = result.stdout
-
-    col_match = re.search(
-        r'COLUMN\s+NUMBERS\s*\n(.*?)(?:\n\f|\Z)',
-        raw, re.DOTALL | re.IGNORECASE
-    )
-    if not col_match:
-        return None
-
-    col_line = col_match.group(1).strip()
-    column_ids = re.findall(r'\b([GP][C][A-Z0-9]+)\b', col_line, re.IGNORECASE)
-    column_ids = [c.upper() for c in column_ids]
-    if not column_ids:
-        return None
-
-    n_cols = len(column_ids)
-
-    mix_match = re.search(r'CONCRETE\s+GRADE\s*:\s*(M\d+)', raw, re.IGNORECASE)
-    global_mix = mix_match.group(1).upper() if mix_match else None
-
-    lines = raw.split('\n')
-
-    level_pattern = re.compile(
-        r'^\s*(BASE|LG|GF|P0[0-9]|P[0-9]+|ECO[-\s]?DECK)\s*$',
-        re.IGNORECASE
-    )
-
-    col_line_full = ""
-    for i, line in enumerate(lines):
-        if 'COLUMN' in line.upper() and 'NUMBERS' in line.upper():
-            # The actual IDs are in the next line(s)
-            for j in range(i+1, min(i+4, len(lines))):
-                if re.search(r'[GP][C][A-Z0-9]', lines[j], re.IGNORECASE):
-                    col_line_full = lines[j]
-                    break
-            break
-
-    col_positions = []
-    for cid in column_ids:
-        pos = col_line_full.find(cid)
-        if pos >= 0:
-            col_positions.append(pos)
-        else:
-            col_positions.append(None)
-
-    level_order = [
-        "BASE TO LG", "LG TO GF", "GF TO P01",
-        "P01 TO P02", "P02 TO P03", "P03 TO P04",
-        "P04 TO P05", "P05 TO P06", "P06 TO ECO-DECK"
-    ]
-
-    def extract_values_at_positions(line, positions, n):
-        """
-        Extract n values from `line` based on approximate char positions.
-        Returns list of n strings (empty string if no value found at position).
-        """
-        values = []
-        if not positions or None in positions:
-            return [""] * n
-
-        for i, pos in enumerate(positions):
-            if pos is None:
-                values.append("")
-                continue
-            # Define window: from this column's position to next column's position
-            next_pos = positions[i+1] if i+1 < len(positions) else len(line) + 60
-            window = line[max(0, pos-5):min(len(line), next_pos)]
-            window = window.strip()
-            values.append(window)
-        return values
-
-    def parse_size(s):
-        if not s or not s.strip():
-            return {"width": None, "depth": None, "length": None}
-        nums = [int(n) for n in re.findall(r'\b(\d+)\b', s) if int(n) >= 100]
-        if len(nums) >= 2:
-            return {"width": nums[0], "depth": None, "length": nums[1]}
-        elif len(nums) == 1:
-            return {"width": nums[0], "depth": None, "length": None}
-        return {"width": None, "depth": None, "length": None}
-
-    def parse_steel(s):
-        if not s or not s.strip():
-            return []
-        parts = re.split(r'\+', s)
-        result = []
-        for p in parts:
-            p = p.strip()
-            m = re.match(r'^(\d+)-[Tt](\d+)$', p.replace(' ', ''))
-            if m:
-                result.append(f"{m.group(1)}-T{m.group(2)}")
-        return result
-
-    def parse_links(s):
-        if not s or not s.strip():
-            return {"dia": [], "spacing": []}
-        dia = []
-        spacing = []
-        for m in re.finditer(r'LOC\s*\d+\s*:\s*-?\s*[Tt](\d+)\s*[-]?(\d+)', s, re.IGNORECASE):
-            d = f"T{m.group(1)}"
-            sp = f"{m.group(2)} C/C"
-            if d not in dia:
-                dia.append(d)
-            if sp not in spacing:
-                spacing.append(sp)
-        return {"dia": dia, "spacing": spacing}
-
-    size_line_re  = re.compile(r'\bSIZE\b', re.IGNORECASE)
-    steel_line_re = re.compile(r'\bSTEEL\b', re.IGNORECASE)
-    links_line_re = re.compile(r'\bLINKS\b', re.IGNORECASE)
-    dim_re        = re.compile(r'\d+\s*[Xx]\s*\d+')
-
-    current_level_from = None
-    current_level_to   = None
-
-    size_lines  = []
-    steel_lines = []
-    links_lines = []
-    level_labels = []  # (line_idx, label)
-
-    for i, line in enumerate(lines):
-        upper = line.upper()
-        if size_line_re.search(line) and dim_re.search(line):
-            size_lines.append((i, line))
-        elif size_line_re.search(line) and not dim_re.search(line):
-            # SIZE row with no values (empty row)
-            size_lines.append((i, line))
-        if steel_line_re.search(line):
-            steel_lines.append((i, line))
-        if links_line_re.search(line):
-            links_lines.append((i, line))
-
-    triplets = []
-    used_steel = set()
-    used_links = set()
-
-    for si, sline in size_lines:
-        best_steel = None
-        for ti, tline in steel_lines:
-            if ti > si and ti - si <= 6 and ti not in used_steel:
-                best_steel = (ti, tline)
-                used_steel.add(ti)
-                break
-        best_links = None
-        ref = best_steel[0] if best_steel else si
-        for li, lline in links_lines:
-            if li > ref and li - ref <= 6 and li not in used_links:
-                best_links = (li, lline)
-                used_links.add(li)
-                break
-        triplets.append((si, sline, best_steel, best_links))
-
-    def get_level_label_near(line_idx, lines):
-        """
-        Look backward from line_idx to find level labels.
-        Returns canonical level name or None.
-        """
-        label_map = {
-            'BASE': 'BASE', 'LG': 'LG', 'GF': 'GF',
-            'P01': 'P01', 'P02': 'P02', 'P03': 'P03',
-            'P04': 'P04', 'P05': 'P05', 'P06': 'P06',
-            'ECO': 'ECO-DECK'
-        }
-        found = []
-        for j in range(max(0, line_idx-8), line_idx+1):
-            ln = lines[j].strip().upper()
-            for k, v in label_map.items():
-                if re.match(rf'^{k}[-\s]?', ln) or ln == k:
-                    found.append(v)
-        return found
-
-    n_levels = len(level_order)
-    n_triplets = len(triplets)
-
-    print(f"   Found {n_triplets} SIZE/STEEL/LINKS triplets for {n_levels} levels")
-
-    assigned = list(zip(reversed(level_order[:n_triplets]), triplets[:n_triplets]))
-    levels_in_pdf = {lv for lv, _ in assigned}
-    missing_levels = [lv for lv in level_order if lv not in levels_in_pdf]
-
-    def parse_triplet_values(size_line, steel_line_tuple, links_line_tuple, col_positions, n_cols):
-        """Extract values for each column from a triplet."""
-        sizes  = [""] * n_cols
-        steels = [""] * n_cols
-        links_ = [""] * n_cols
-
-        def split_by_positions(line, positions):
-            vals = []
-            for i, pos in enumerate(positions):
-                if pos is None:
-                    vals.append("")
-                    continue
-                end = positions[i+1] if i+1 < len(positions) else len(line)+60
-                chunk = line[max(0, pos-3): min(len(line), end-1)]
-                chunk = re.sub(r'^[GP][C][A-Z0-9]+\s*', '', chunk.strip(), flags=re.IGNORECASE)
-                chunk = re.sub(r'^\s*(SIZE|STEEL|LINKS)\s*', '', chunk, flags=re.IGNORECASE)
-                vals.append(chunk.strip())
-            return vals
-
-        sizes  = split_by_positions(size_line,
-                    links_line_tuple[1] if links_line_tuple else size_line, col_positions)
-        size_vals  = re.findall(r'\d+\s*[Xx]\s*\d+\s*\([^)]+\)', size_line)
-        steel_vals = []
-        if steel_line_tuple:
-            steel_vals = re.findall(r'\d+-[Tt]\d+(?:\s*\+\s*\d+-[Tt]\d+)*', steel_line_tuple[1])
-        links_vals = []
-        if links_line_tuple:
-            links_vals = re.findall(r'LOC\s*1[^A]+AND\s*LOC\s*2[^\n]+', links_line_tuple[1], re.IGNORECASE)
-
-        return size_vals, steel_vals, links_vals
-
-    columns = []
-
-    for level, (si, sline, steel_t, links_t) in assigned:
-        size_vals, steel_vals, links_vals = parse_triplet_values(
-            sline, steel_t, links_t, col_positions, n_cols
-        )
-
-        n_filled = max(len(size_vals), len(steel_vals), len(links_vals))
-
-        filled_cols = set()
-
-        if size_vals:
-            for sv in size_vals:
-                idx = sline.find(sv.split('(')[0].strip())
-                if idx >= 0 and col_positions:
-                    nearest_col = min(range(n_cols),
-                        key=lambda i: abs((col_positions[i] or 0) - idx) if col_positions[i] is not None else 9999)
-                    filled_cols.add(nearest_col)
-
-        sv_idx = 0
-        stv_idx = 0
-        lv_idx = 0
-
-        for ci, cid in enumerate(column_ids):
-            if ci in filled_cols or (not col_positions[ci] is not None and n_filled > 0 and ci < n_filled):
-                sv  = size_vals[sv_idx]   if sv_idx  < len(size_vals)  else ""
-                stv = steel_vals[stv_idx] if stv_idx < len(steel_vals) else ""
-                lv  = links_vals[lv_idx]  if lv_idx  < len(links_vals) else ""
-                sv_idx  += 1
-                stv_idx += 1
-                lv_idx  += 1
-            else:
-                sv, stv, lv = "", "", ""
-
-            size_obj = parse_size(sv)
-            steel_obj = parse_steel(stv)
-            links_obj = parse_links(lv)
-
-            columns.append({
-                "column_no":     cid,
-                "column_name":   level,
-                "size":          size_obj,
-                "reinforcement": steel_obj,
-                "stirrups":      links_obj,
-                "mix":           global_mix,
-                "steel_grade":   None,
-            })
-
-    for level in missing_levels:
-        for cid in column_ids:
-            columns.append({
-                "column_no":     cid,
-                "column_name":   level,
-                "size":          {"width": None, "depth": None, "length": None},
-                "reinforcement": [],
-                "stirrups":      {"dia": [], "spacing": []},
-                "mix":           global_mix,
-                "steel_grade":   None,
-            })
-
-    return columns if columns else None
-
-def normalize_reinforcement_entry(r):
-    r = str(r).strip()
-    r = re.sub(r'\s*-\s*', '-', r)
-    r = r.replace(' ', '')
-    return r if r else None
+_STEEL_RE = re.compile(r"\d+-T\d+",    re.IGNORECASE)   # "4-T16"
+_TYPE_RE  = re.compile(r"\(TYPE-\d+\)", re.IGNORECASE)   # "(TYPE-26)"
+_MIX_RE   = re.compile(r"^M\d+$",      re.IGNORECASE)   # "M40"
 
 
-def normalize_reinforcement(reinforcement):
-    if not reinforcement or not isinstance(reinforcement, list):
+# ─────────────────────────────────────────────────────────────────────────────
+# Shared utilities  (identical to pattern-9)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def cluster_1d(positions: list) -> list:
+    """Ratio-jump clustering — same algorithm as pattern-9."""
+    if not positions:
         return []
+    positions = sorted(positions)
+    if len(positions) < 2:
+        return [float(positions[0])]
+    diffs = [positions[i + 1] - positions[i] for i in range(len(positions) - 1)]
+    ds    = sorted(diffs)
+    threshold = 20.0
+    if len(ds) >= 4:
+        max_r, best = 1.0, 0
+        for i in range(len(ds) - 1):
+            if ds[i] > 0:
+                r = ds[i + 1] / ds[i]
+                if r > max_r:
+                    max_r, best = r, i
+        if max_r > 2.0:
+            threshold = max((ds[best] + ds[best + 1]) / 2, threshold)
+    else:
+        threshold = max(ds[len(ds) // 2] * 2, threshold)
+    clusters = [[positions[0]]]
+    for i, d in enumerate(diffs):
+        if d < threshold:
+            clusters[-1].append(positions[i + 1])
+        else:
+            clusters.append([positions[i + 1]])
+    return [sum(c) / len(c) for c in clusters]
+
+
+def _median_spacing(centers: list) -> float:
+    if len(centers) < 2:
+        return 200.0
+    diffs = sorted(centers[i + 1] - centers[i] for i in range(len(centers) - 1))
+    return diffs[len(diffs) // 2]
+
+
+def nearest_index(value: float, centers: list, half: float) -> int:
+    """Return index of the nearest centre within ±half; -1 if none qualify."""
+    best_i, best_d = -1, float("inf")
+    for i, c in enumerate(centers):
+        d = abs(value - c)
+        if d < best_d:
+            best_d, best_i = d, i
+    return best_i if best_d <= half else -1
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Sub-row reconciliation  (pattern-10 specific)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _reconcile_rows(raw_clusters: list, n_floors: int):
+    """
+    Pattern-10 cells have 3 sub-rows: SIZE / STEEL / LINKS (~33 pt apart).
+    If SIZE detection accidentally fires on multiple sub-rows, cluster_1d may
+    return 27 clusters instead of 9.  Downsample by taking every k-th cluster.
+
+    Returns (size_row_centres, sub_spacing).
+    """
+    sub_spacing = _median_spacing(raw_clusters)
+    n = len(raw_clusters)
+    if n_floors <= 0 or n <= n_floors:
+        return raw_clusters, sub_spacing
+    step = round(n / n_floors)
+    if step < 2:
+        return raw_clusters, sub_spacing
+    row_centres = raw_clusters[::step][:n_floors]
+    print(f"  Reconciled {n} raw Y clusters → {len(row_centres)} floor rows "
+          f"(step={step}, sub_spacing={sub_spacing:.1f} pt)")
+    return row_centres, sub_spacing
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Data parsers
+# ─────────────────────────────────────────────────────────────────────────────
+
+def split_size_steel(line: str):
+    """
+    '300 X 1150 (TYPE-26) 4-T16 + 18-T12'  →  (size_part, steel_part)
+    Split at TYPE token, or at first N-TNN if no TYPE token.
+    """
+    m = _TYPE_RE.search(line)
+    if m:
+        return line[:m.end()].strip(), line[m.end():].strip()
+    m2 = _STEEL_RE.search(line)
+    if m2:
+        return line[:m2.start()].strip(), line[m2.start():].strip()
+    return line.strip(), ""
+
+
+def parse_size_10(txt: str) -> dict:
+    """'300 X 1150'  →  {width:300, depth:None, length:1150}"""
+    m = re.search(r"(\d+)\s*[xX]\s*(\d+)(?:\s*[xX]\s*(\d+))?", txt)
+    if not m:
+        return {"width": None, "depth": None, "length": None}
+    nums = [int(g) for g in m.groups() if g is not None]
+    if len(nums) == 2:
+        return {"width": nums[0], "depth": None,    "length": nums[1]}
+    return  {"width": nums[0], "depth": nums[1], "length": nums[2]}
+
+
+def parse_reinforcement(txt: str) -> list:
+    """'4-T16 + 18-T12'  →  ['4-T16', '18-T12']"""
     result = []
-    for r in reinforcement:
-        for part in str(r).split('+'):
-            n = normalize_reinforcement_entry(part.strip())
-            if n and n not in result:
-                result.append(n)
+    for m in re.finditer(r"(\d+)-T(\d+)", txt, re.IGNORECASE):
+        entry = f"{m.group(1)}-T{m.group(2)}"
+        if entry not in result:
+            result.append(entry)
     return result
 
 
-def parse_links_string(links_str):
-    dia, spacing = [], []
-    pattern = re.compile(r'LOC\s*\d+\s*:\s*-?\s*[Tt](\d+)\s*[-]?(\d+)', re.IGNORECASE)
-    for m in pattern.finditer(str(links_str)):
-        d = f"T{m.group(1)}"
-        s = f"{m.group(2)} C/C"
-        if d not in dia: dia.append(d)
-        if s not in spacing: spacing.append(s)
-    return dia, spacing
+def parse_links(txt: str) -> dict:
+    """
+    'LOC 1:-T10 -100 AND LOC 2:-T8 -150'
+    →  {dia: ['T10','T8'], spacing: ['100 C/C','150 C/C']}
+    """
+    segments  = re.split(r"\bAND\b", txt, flags=re.IGNORECASE)
+    dias: list     = []
+    spacings: list = []
+    for seg in segments:
+        dm = re.search(r"T(\d+)", seg, re.IGNORECASE)
+        if dm:
+            t = f"T{dm.group(1)}"
+            if t not in dias:
+                dias.append(t)
+        sm = re.search(r"[-@]\s*(\d{2,3})(?:\s|$|-)", seg)
+        if sm:
+            val = int(sm.group(1))
+            if 50 <= val <= 500:
+                sp = f"{val} C/C"
+                if sp not in spacings:
+                    spacings.append(sp)
+    return {"dia": dias, "spacing": spacings}
 
 
-def normalize_stirrups(stirrups):
-    if not stirrups or not isinstance(stirrups, dict):
-        return {"dia": [], "spacing": []}
-    raw_dia     = stirrups.get("dia", [])
-    raw_spacing = stirrups.get("spacing", [])
-    if not isinstance(raw_dia, list):    raw_dia = [raw_dia]
-    if not isinstance(raw_spacing, list): raw_spacing = [raw_spacing]
-    dia, spacing = [], []
-    for d in raw_dia:
-        d_str = str(d).strip()
-        if 'LOC' in d_str.upper():
-            pd, ps = parse_links_string(d_str)
-            for x in pd:
-                if x not in dia: dia.append(x)
-            for x in ps:
-                if x not in spacing: spacing.append(x)
-        else:
-            m = re.match(r'^[Tt]?(\d+)[Tt]?$', d_str.replace(' ', ''))
-            if m:
-                nd = f"T{m.group(1)}"
-                if nd not in dia: dia.append(nd)
-    for s in raw_spacing:
-        s_str = str(s).strip()
-        if re.search(r'[Rr]ing', s_str): continue
-        if 'LOC' in s_str.upper():
-            pd, ps = parse_links_string(s_str)
-            for x in pd:
-                if x not in dia: dia.append(x)
-            for x in ps:
-                if x not in spacing: spacing.append(x)
-        else:
-            s_clean = s_str.upper().replace(' ', '')
-            ns = f"{s_clean} C/C" if re.match(r'^\d+$', s_clean) else re.sub(r'C/C$', ' C/C', s_clean).strip()
-            if ns and ns not in spacing: spacing.append(ns)
-    return {"dia": dia, "spacing": spacing}
+# ─────────────────────────────────────────────────────────────────────────────
+# Vision label detection  (GPT-4.1-mini)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_VISION_PROMPT = """\
+This image shows a structural COLUMN SCHEDULE table from a construction drawing.
+
+Read two things:
+
+1. COLUMN HEADERS — labels at the TOP or BOTTOM of each data column.
+   Format: two letters + digits, e.g. "GC39", "PC174", "GC38", "PC171".
+   List them LEFT to RIGHT as they appear.
+
+2. FLOOR RANGE LABELS — labels on the LEFT side of the table, one per row.
+   Format: "FLOOR_A TO FLOOR_B", e.g. "BASE TO LG", "LG TO GF", "GF TO P01",
+   "P01 TO P02", "P05 TO P06", "P06 TO ECO-DECK".
+   List them TOP to BOTTOM as they appear.
+
+Rules:
+  • Only report labels that are CLEARLY VISIBLE — do not guess.
+  • Include ALL column headers (there may be 10+ of them).
+  • Include ALL floor range rows.
+
+Return ONLY raw JSON, no markdown, no code fences:
+{
+  "col_headers":  ["GC39", "PC174", "GC38"],
+  "floor_ranges": ["BASE TO LG", "LG TO GF", "GF TO P01"]
+}
+"""
 
 
-def normalize_size(size):
-    if isinstance(size, str):
-        dims = [int(n) for n in re.findall(r'\b(\d+)\b', size) if int(n) >= 100]
-        if len(dims) >= 2: return {"width": dims[0], "depth": None, "length": dims[1]}
-        elif len(dims) == 1: return {"width": dims[0], "depth": None, "length": None}
-        return {"width": None, "depth": None, "length": None}
-    if isinstance(size, dict):
-        def si(v):
-            if v is None: return None
-            try: return int(v)
-            except: return None
-        return {"width": si(size.get("width")), "depth": si(size.get("depth")), "length": si(size.get("length"))}
-    return {"width": None, "depth": None, "length": None}
+def _vision_detect_labels(pdf_path: str) -> dict:
+    print("  🔭 Running vision model to detect column/floor labels …")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        imgs = convert_pdf_to_images(pdf_path, tmpdir, dpi=200)
+        if not imgs:
+            print("  ⚠️  PDF→image conversion failed.")
+            return {"col_headers": [], "floor_ranges": []}
+        raw = extract_from_image(imgs[0], _VISION_PROMPT)
+    try:
+        text = raw.strip()
+        if "```" in text:
+            parts = text.split("```")
+            block = parts[1] if len(parts) >= 3 else parts[0]
+            if block.lower().startswith("json"):
+                block = block[4:]
+            text = block.strip()
+        brace = text.find("{")
+        if brace > 0:
+            text = text[brace:]
+        result       = json.loads(text)
+        col_headers  = [str(h).strip().upper() for h in result.get("col_headers",  [])]
+        floor_ranges = [str(f).strip().upper() for f in result.get("floor_ranges", [])]
+        print(f"  Vision → col_headers  : {col_headers}")
+        print(f"  Vision → floor_ranges : {floor_ranges}")
+        return {"col_headers": col_headers, "floor_ranges": floor_ranges}
+    except Exception as e:
+        print(f"  ⚠️  Vision parse failed: {e}\n  Raw: {raw[:300]}")
+        return {"col_headers": [], "floor_ranges": []}
 
 
-def is_empty_size(size):
-    return size.get("width") is None and size.get("length") is None
+# ─────────────────────────────────────────────────────────────────────────────
+# Grid detection  —  pattern-10 equivalent of pattern-9's _detect_grid_centres
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _get_all_words(doc: fitz.Document) -> list:
+    out = []
+    for page in doc:
+        out.extend((w[0], w[1], w[2], w[3], w[4]) for w in page.get_text("words"))
+    return out
 
 
-def normalize_column_no(col_no):
-    return str(col_no).strip().upper()
+def _detect_grid_centres_10(words: list):
+    """
+    Pattern-10 equivalent of pattern-9's _detect_grid_centres.
 
-def normalize_column_name(name):
-    if not name: return name
-    return str(name).strip().upper()
+    Pattern-9 finds single SIZE tokens "300x950" and uses their midpoints as
+    cell anchors.  Pattern-10 has three tokens: "NNN" "X" "MMM".
 
-def normalize_grade(val):
-    if not val: return None
-    return str(val).strip().upper()
+    For each complete "NNN X MMM" triplet on the same text line:
+      x_anchor = midpoint of the full span  =  (x0_of_NNN + x1_of_MMM) / 2
+      y_anchor = Y midpoint of the SIZE line
+
+    These (x, y) anchors are clustered exactly as in pattern-9 to find
+    col_centres (X) and SIZE row Y centres.
+
+    Returns (col_centres, raw_row_ys).
+    """
+    # Group tokens by snapped Y (4-pt grid) to find triplets on the same line
+    snap_groups: dict = defaultdict(list)
+    for x0, y0, x1, y1, txt in words:
+        snap_y = round((y0 + y1) / 2 / 4) * 4
+        snap_groups[snap_y].append((x0, x1, (y0 + y1) / 2, txt.strip()))
+
+    xs: list = []
+    ys: list = []
+
+    for snap_y, tokens in snap_groups.items():
+        tokens_s = sorted(tokens, key=lambda t: t[0])   # left → right
+        n = len(tokens_s)
+        for i in range(n - 2):
+            a = tokens_s[i]        # "NNN"
+            b = tokens_s[i + 1]    # "X"
+            c = tokens_s[i + 2]    # "MMM"
+            if (re.match(r"^\d{2,4}$", a[3]) and
+                    b[3].upper() == "X" and
+                    re.match(r"^\d{3,4}$", c[3])):
+                # Span midpoint — same principle as pattern-9 SIZE token centre
+                x_anchor = (a[0] + c[1]) / 2
+                y_anchor = (a[2] + c[2]) / 2   # mean Y of "NNN" and "MMM"
+                xs.append(x_anchor)
+                ys.append(y_anchor)
+
+    if not xs:
+        return [], []
+
+    col_centres  = cluster_1d(xs)
+    raw_row_ys   = cluster_1d(ys)
+
+    print(f"  'NNN X MMM' triplets found: {len(xs)}  "
+          f"→ {len(col_centres)} col clusters, {len(raw_row_ys)} raw row clusters")
+
+    return col_centres, raw_row_ys
 
 
-def is_valid_column(col):
-    col_no = str(col.get("column_no", "")).strip().upper()
-    return bool(re.match(r'^[GP][C][A-Z0-9]+', col_no))
+# ─────────────────────────────────────────────────────────────────────────────
+# Layout detection
+# ─────────────────────────────────────────────────────────────────────────────
+
+def detect_layout_10(doc: fitz.Document, pdf_path: str) -> dict:
+    """
+    Build the full grid layout.
+
+    Mirrors detect_layout() from pattern-9:
+      • X/Y centres from SIZE triplet span midpoints (cluster_1d)
+      • Human-readable labels from GPT-4.1-mini vision
+      • half = spacing * 0.48  (same as pattern-9)
+      • y_shift = sub_spacing  (shifts Y coordinate before comparison so the
+                                symmetric window covers all three sub-rows)
+    """
+    words = _get_all_words(doc)
+
+    # ── Vision: actual label text ─────────────────────────────────────────────
+    vision       = _vision_detect_labels(pdf_path)
+    col_headers  = vision["col_headers"]    # left → right
+    floor_ranges = vision["floor_ranges"]   # top  → bottom
+    n_floors     = len(floor_ranges)
+
+    # ── Grid centres from SIZE span midpoints ─────────────────────────────────
+    col_centres, raw_row_ys = _detect_grid_centres_10(words)
+
+    if not col_centres or not raw_row_ys:
+        print("  ❌  No 'NNN X MMM' patterns found — page may be fully rasterised.")
+        return {}
+
+    # ── Reconcile sub-row clusters → floor-level row centres ─────────────────
+    size_row_centres, sub_spacing = _reconcile_rows(raw_row_ys, n_floors)
+
+    # ── Spacing + window — SAME FORMULA as pattern-9 ─────────────────────────
+    col_spacing  = _median_spacing(col_centres)
+    row_spacing  = _median_spacing(size_row_centres)
+
+    col_half = col_spacing * 0.48      # pattern-9: lap_half = spacing * 0.48
+    y_half   = row_spacing * 0.48      # pattern-9: half     = spacing * 0.48
+
+    # y_shift: shift the Y coord by one sub-row before nearest_index lookup.
+    # This makes the effective window centre land on the STEEL row (mid sub-row)
+    # so SIZE (-sub_spacing) and LINKS (+sub_spacing) are equidistant from it.
+    # Pattern-9 equivalent: gi = nearest_index(grp_coord - shift, grp_centres, half)
+    y_shift = sub_spacing   # one sub-row down ≈ 33 pt
+
+    # Safety check: if sub_spacing is implausibly large (reconciliation wrong)
+    if sub_spacing > row_spacing * 0.6:
+        y_shift = row_spacing / 3.0
+        print(f"  ⚠️  y_shift reset to row_spacing/3 = {y_shift:.1f} pt")
+
+    print(
+        f"  col_spacing={col_spacing:.1f}  row_spacing={row_spacing:.1f}  "
+        f"sub_spacing={sub_spacing:.1f}\n"
+        f"  col_half={col_half:.1f}  y_half={y_half:.1f}  y_shift={y_shift:.1f}"
+    )
+
+    # ── Assign names by rank order ────────────────────────────────────────────
+    col_names = [
+        col_headers[i] if i < len(col_headers) else f"COL {i + 1}"
+        for i in range(len(col_centres))
+    ]
+    row_names = [
+        floor_ranges[i] if i < len(floor_ranges) else f"ROW {i + 1}"
+        for i in range(len(size_row_centres))
+    ]
+
+    return {
+        "col_centres":      col_centres,
+        "col_names":        col_names,
+        "col_half":         col_half,
+        "row_centres":      size_row_centres,  # SIZE row Y anchors
+        "row_names":        row_names,
+        "y_half":           y_half,
+        "y_shift":          y_shift,
+        "row_spacing":      row_spacing,
+        "col_spacing":      col_spacing,
+        "sub_spacing":      sub_spacing,
+    }
 
 
-def post_process(columns):
-    processed = []
-    for col in columns:
-        if not isinstance(col, dict): continue
-        if not is_valid_column(col): continue
-        col["column_no"]     = normalize_column_no(col.get("column_no", ""))
-        col["column_name"]   = normalize_column_name(col.get("column_name", ""))
-        col["size"]          = normalize_size(col.get("size"))
-        col["reinforcement"] = normalize_reinforcement(col.get("reinforcement", []))
-        col["stirrups"]      = normalize_stirrups(col.get("stirrups"))
-        col["mix"]           = normalize_grade(col.get("mix"))
-        col["steel_grade"]   = normalize_grade(col.get("steel_grade"))
-        processed.append(col)
-    return processed
+# ─────────────────────────────────────────────────────────────────────────────
+# Per-page extraction  —  mirrors pattern-9's extract_from_pdf_page
+# ─────────────────────────────────────────────────────────────────────────────
+
+def extract_from_pdf_page_10(page: fitz.Page, layout: dict) -> list:
+    words = page.get_text("words")
+    if not words:
+        return []
+
+    col_centres = layout["col_centres"]
+    col_names   = layout["col_names"]
+    row_centres = layout["row_centres"]   # SIZE row Y
+    row_names   = layout["row_names"]
+    col_half    = layout["col_half"]
+    y_half      = layout["y_half"]
+    y_shift     = layout["y_shift"]
+    n_cols      = len(col_names)
+    n_rows      = len(row_names)
+
+    # ── Step 1: assign each word to (snap_y, ri, ci) ─────────────────────────
+    # Pattern-9: gi = nearest_index(grp_coord - shift, grp_centres, half)
+    # Pattern-10: ri = nearest_index(yc - y_shift,    row_centres, y_half)
+    cell_lines: dict = defaultdict(list)
+
+    for entry in words:
+        x0, y0, x1, y1, txt = entry[0], entry[1], entry[2], entry[3], entry[4]
+        txt = txt.strip()
+        if not txt:
+            continue
+        xc = (x0 + x1) / 2
+        yc = (y0 + y1) / 2
+
+        ci = nearest_index(xc,          col_centres, col_half)
+        ri = nearest_index(yc - y_shift, row_centres, y_half)   # ← pattern-9 shift
+        if ci < 0 or ri < 0:
+            continue
+
+        snap_y = round(yc / 4) * 4
+        cell_lines[(snap_y, ri, ci)].append((x0, txt))
+
+    # ── Step 2: classify lines per cell ──────────────────────────────────────
+    size_acc:  dict = {}
+    reinf_acc: dict = defaultdict(list)
+    links_acc: dict = defaultdict(list)
+    mix_acc:   dict = {}
+
+    for (snap_y, ri, ci), tokens in cell_lines.items():
+        key       = (ri, ci)
+        line_text = " ".join(t[1] for t in sorted(tokens, key=lambda t: t[0]))
+        lu        = line_text.upper()
+
+        # SIZE  (may carry STEEL on the same line)
+        if re.search(r"\d+\s*[xX]\s*\d+", line_text):
+            size_part, steel_part = split_size_steel(line_text)
+            if key not in size_acc:
+                size_acc[key] = parse_size_10(size_part)
+            if steel_part and not reinf_acc[key]:
+                r = parse_reinforcement(steel_part)
+                if r:
+                    reinf_acc[key] = r
+
+        # LINKS  (check before standalone STEEL to avoid "1:-T10" mis-match)
+        elif "LOC" in lu or ("AND" in lu and _STEEL_RE.search(line_text)):
+            links_acc[key].append(line_text)
+
+        # Standalone STEEL
+        elif _STEEL_RE.search(line_text) and not reinf_acc[key]:
+            r = parse_reinforcement(line_text)
+            if r:
+                reinf_acc[key] = r
+
+        # Concrete mix
+        elif _MIX_RE.match(line_text.strip()):
+            mix_acc[key] = line_text.strip().upper()
+
+    # ── Step 3: assemble records ──────────────────────────────────────────────
+    records = []
+    for ri in range(n_rows):
+        for ci in range(n_cols):
+            key = (ri, ci)
+            if key not in size_acc:
+                continue
+
+            links_text = " ".join(links_acc.get(key, []))
+            stirrups   = parse_links(links_text) if links_text else {"dia": [], "spacing": []}
+
+            records.append({
+                "column_no":     col_names[ci],
+                "column_name":   row_names[ri],
+                "size":          size_acc[key],
+                "reinforcement": reinf_acc.get(key, []),
+                "stirrups":      stirrups,
+                "mix":           mix_acc.get(key),
+                "steel_grade":   None,
+            })
+
+    return records
 
 
-def merge_pages(all_columns):
-    seen = {}
-    for col in all_columns:
-        key = (col["column_no"], col["column_name"])
-        if key not in seen:
-            seen[key] = col
-        else:
-            if is_empty_size(seen[key]["size"]) and not is_empty_size(col["size"]):
-                seen[key] = col
+# ─────────────────────────────────────────────────────────────────────────────
+# Merge / sort / report
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _merge_pages(records: list) -> list:
+    seen: dict = {}
+    for rec in records:
+        seen[(rec["column_no"], rec["column_name"])] = rec
     return list(seen.values())
 
 
-def fill_missing_cells(columns):
-    all_col_nos = list(dict.fromkeys(c["column_no"]   for c in columns))
-    all_levels  = list(dict.fromkeys(c["column_name"] for c in columns))
-    existing    = {(c["column_no"], c["column_name"]): c for c in columns}
-    global_mix  = next((c["mix"] for c in columns if c.get("mix")), None)
-    filled = []
-    for col_no in all_col_nos:
-        for level in all_levels:
-            key = (col_no, level)
-            if key in existing:
-                filled.append(existing[key])
-            else:
-                filled.append({
-                    "column_no": col_no, "column_name": level,
-                    "size": {"width": None, "depth": None, "length": None},
-                    "reinforcement": [],
-                    "stirrups": {"dia": [], "spacing": []},
-                    "mix": global_mix, "steel_grade": None,
-                })
-    return filled
+def _sort_records(records: list, layout: dict) -> list:
+    col_order = {c: i for i, c in enumerate(layout["col_names"])}
+    row_order = {r: i for i, r in enumerate(layout["row_names"])}
+    return sorted(
+        records,
+        key=lambda r: (
+            row_order.get(r["column_name"], 99),
+            col_order.get(r["column_no"],   99),
+        ),
+    )
 
 
-def report_completeness(columns):
-    groups, all_levels = defaultdict(set), set()
-    for col in columns:
-        groups[col["column_no"]].add(col["column_name"])
-        all_levels.add(col["column_name"])
-    actual = len(columns)
-    empty  = sum(1 for c in columns if is_empty_size(c["size"]))
-    filled = actual - empty
+def _report(records: list, layout: dict):
+    col_names = layout.get("col_names", [])
+    row_names = layout.get("row_names", [])
+    found: dict = defaultdict(set)
+    for r in records:
+        found[r["column_name"]].add(r["column_no"])
     print(f"\n📊 Extraction summary:")
-    print(f"   Column groups  : {len(groups)}")
-    print(f"   Level ranges   : {len(all_levels)}")
-    print(f"   Total records  : {actual}  (filled: {filled}, empty: {empty})")
-    print(f"   Columns found  : {sorted(groups.keys())}")
-    print()
+    print(f"   Layout  : {len(row_names)} rows × {len(col_names)} cols"
+          f" = {len(row_names) * len(col_names)} expected")
+    print(f"   Records : {len(records)}")
+    for row in row_names:
+        missing = set(col_names) - found.get(row, set())
+        if missing:
+            print(f"   ⚠️  '{row}' missing: {sorted(missing)}")
+    if not any(set(col_names) - found.get(r, set()) for r in row_names):
+        print("   ✅  All cells extracted.")
 
 
-def parse_model_output(raw):
-    text = raw.strip()
-    if '```' in text:
-        parts = text.split('```')
-        if len(parts) >= 3:
-            block = parts[1]
-            if block.lower().startswith('json'): block = block[4:]
-            text = block.strip()
-    brace_idx = text.find('{')
-    if brace_idx > 0: text = text[brace_idx:]
-    return json.loads(text)
+# ─────────────────────────────────────────────────────────────────────────────
+# Main pipeline
+# ─────────────────────────────────────────────────────────────────────────────
 
-def process_pdf(pdf_path):
-    file_name = os.path.splitext(os.path.basename(pdf_path))[0]
+def process_pdf(pdf_path: str):
+    file_name     = os.path.splitext(os.path.basename(pdf_path))[0]
     output_folder = os.path.join(OUTPUT_DIR, file_name)
     os.makedirs(output_folder, exist_ok=True)
 
-    print(f"\n⚙️  Attempting text-based extraction for {file_name}...")
-    text_columns = extract_from_pdf_text(pdf_path)
+    doc = fitz.open(pdf_path)
 
-    if text_columns and len(text_columns) > 0:
-        print(f"   ✅ Text extraction succeeded ({len(text_columns)} raw records)")
-        all_columns = post_process(text_columns)
-        method = "text"
-    else:
-        print(f"   ⚠️  Text extraction failed — falling back to vision model")
-        image_paths = convert_pdf_to_images(pdf_path, output_folder, dpi=300)
-        prompt = load_prompt()
-        all_columns = []
+    print(f"\n🔍 Detecting layout from '{file_name}' …")
+    layout = detect_layout_10(doc, pdf_path)
 
-        for img_path in tqdm(image_paths, desc=f"Processing {file_name}"):
-            result = extract_from_image(img_path, prompt)
-            try:
-                parsed = parse_model_output(result)
-                raw_columns = parsed.get("columns", [])
-                if not isinstance(raw_columns, list): continue
-                all_columns.extend(post_process(raw_columns))
-            except Exception as e:
-                print(f"  ⚠️  Failed to parse {os.path.basename(img_path)}: {e}")
-                debug_path = os.path.splitext(img_path)[0] + "_raw.txt"
-                try:
-                    with open(debug_path, "w", encoding="utf-8") as dbg:
-                        dbg.write(result)
-                except Exception:
-                    pass
-        method = "vision"
+    if not layout:
+        print("  ❌  Layout detection failed.")
+        return
 
-    merged        = merge_pages(all_columns)
-    final_columns = fill_missing_cells(merged)
-    report_completeness(final_columns)
+    print(f"  Columns ({len(layout['col_names'])}): {layout['col_names']}")
+    print(f"  Rows    ({len(layout['row_names'])}): {layout['row_names']}")
+
+    all_records: list = []
+    for page_no in tqdm(range(len(doc)), desc=f"Processing {file_name}"):
+        page    = doc[page_no]
+        records = extract_from_pdf_page_10(page, layout)
+        status  = f"✅ {len(records)} records" if records else "⚠️  no records"
+        tqdm.write(f"  Page {page_no + 1}: {status}")
+        all_records.extend(records)
+
+    final = _sort_records(_merge_pages(all_records), layout)
+    _report(final, layout)
 
     output_file = os.path.join(output_folder, f"{file_name}.json")
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump({"columns": final_columns}, f, indent=2, ensure_ascii=False)
-
-    print(f"✅ Saved → {output_file}  ({len(final_columns)} records)  [method: {method}]\n")
+        json.dump({"columns": final}, f, indent=2, ensure_ascii=False)
+    print(f"✅ Saved → {output_file}")
 
 
 def main():
