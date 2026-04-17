@@ -1,3 +1,26 @@
+"""
+main_10.py  —  Pattern-10 Column Schedule Extractor
+====================================================
+Mirrors pattern-9 logic exactly:
+
+  PATTERN-9                          PATTERN-10
+  ─────────────────────────────────  ──────────────────────────────────────
+  SIZE token = "300x950" (1 word)    SIZE span  = "300 X 1150" (3 tokens)
+  anchor = SIZE token midpoint (X,Y) anchor = span midpoint (X), SIZE-row Y
+  row_centres = Y of SIZE token      row_centres = Y of SIZE row (top of cell)
+  nearest_index(y - shift, …)        nearest_index(y - y_shift, …)
+  shift = half * 0.5                 y_shift = sub_spacing  (1 sub-row down)
+
+The y_shift converts "SIZE row Y" anchors into effective "STEEL row" anchors
+so the symmetric window (±y_half) covers all three sub-rows:
+   SIZE  at  anchor - sub_spacing   (distance = sub_spacing ≈ 33 pt)
+   STEEL at  anchor + 0             (distance = 0)
+   LINKS at  anchor + sub_spacing   (distance = sub_spacing ≈ 33 pt)
+Both are < y_half ≈ 47 pt → all captured.  Next floor SIZE at +99 pt → NOT captured.
+
+Column/floor labels come from GPT-4.1-mini vision (they are rasterised images).
+"""
+
 import os
 import re
 import json
@@ -19,7 +42,7 @@ from vision_extractor import extract_from_image
 _STEEL_RE = re.compile(r"\d+-T\d+",    re.IGNORECASE)   # "4-T16"
 _TYPE_RE  = re.compile(r"\(TYPE-\d+\)", re.IGNORECASE)   # "(TYPE-26)"
 _MIX_RE   = re.compile(r"^M\d+$",      re.IGNORECASE)   # "M40"
-
+X_SHIFT = 9
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Shared utilities  (identical to pattern-9)
@@ -170,14 +193,13 @@ def parse_links(txt: str) -> dict:
 
         # ── Spacing — find ALL candidate matches, take the LAST one ──────────
         # Pattern: dash or @, optional spaces, 2-4 digits NOT followed by digit
-        candidates = list(re.finditer(r"[-@]\s*(\d{2,4})(?!\d)", seg))
-        for m in reversed(candidates):
+        # extract ALL valid spacings (robust)
+        for m in re.finditer(r"(?<!T)(?:-|@)\s*(\d{2,4})", seg):
             val = int(m.group(1))
             if 50 <= val <= 500:
                 sp = f"{val} C/C"
                 if sp not in spacings:
                     spacings.append(sp)
-                break   # one spacing per AND-segment
     return {"dia": dias, "spacing": spacings}
 
 
@@ -197,7 +219,7 @@ Read two things:
 2. FLOOR RANGE LABELS — labels on the LEFT side of the table, one per row.
    Format: "FLOOR_A TO FLOOR_B", e.g. "BASE TO LG", "LG TO GF", "GF TO P01",
    "P01 TO P02", "P05 TO P06", "P06 TO ECO-DECK".
-   List them TOP to BOTTOM as they appear.
+   List them strictly from TOP to BOTTOM as they appear (eg: "P06 TO ECO-DECK" is at top and "BASE TO LG" is at bottom).
 
 Rules:
   • Only report labels that are CLEARLY VISIBLE — do not guess.
@@ -419,8 +441,8 @@ def extract_from_pdf_page_10(page: fitz.Page, layout: dict) -> list:
         xc = (x0 + x1) / 2
         yc = (y0 + y1) / 2
 
-        ci = nearest_index(xc,          col_centres, col_half)
-        ri = nearest_index(yc - y_shift, row_centres, y_half)   # ← pattern-9 shift
+        ci = nearest_index(xc - X_SHIFT, col_centres, col_half)
+        ri = nearest_index(yc - y_shift, row_centres, y_half * 2.2)
         if ci < 0 or ri < 0:
             continue
 
@@ -449,7 +471,7 @@ def extract_from_pdf_page_10(page: fitz.Page, layout: dict) -> list:
                     reinf_acc[key] = r
 
         # LINKS  (check before standalone STEEL to avoid "1:-T10" mis-match)
-        elif "LOC" in lu or ("AND" in lu and _STEEL_RE.search(line_text)):
+        elif "LOC" in lu or "AND" in lu:
             links_acc[key].append(line_text)
 
         # Standalone STEEL
@@ -471,6 +493,7 @@ def extract_from_pdf_page_10(page: fitz.Page, layout: dict) -> list:
         for ci in range(n_cols):
             key        = (ri, ci)
             links_text = " ".join(links_acc.get(key, []))
+            print("FINAL LINKS TEXT:", links_text)
             stirrups   = parse_links(links_text) if links_text else {"dia": "", "spacing": ""}
             records.append({
                 "column_no":     col_names[ci],
@@ -525,6 +548,46 @@ def _report(records: list, layout: dict):
     if not any(set(col_names) - found.get(r, set()) for r in row_names):
         print("   ✅  All cells extracted.")
 
+# def draw_debug_cells(page, layout, page_no, output_folder):
+
+#     import fitz
+
+#     pix = page.get_pixmap(dpi=150)
+#     img = fitz.Pixmap(pix, 0)  # copy
+
+#     page_rect = page.rect
+
+#     col_centres = layout["col_centres"]
+#     row_centres = layout["row_centres"]
+#     col_half    = layout["col_half"]
+#     y_half      = layout["y_half"]
+#     y_shift     = layout["y_shift"]
+
+#     shape = page.new_shape()
+
+#     for ci, cx in enumerate(col_centres):
+#         for ri, cy in enumerate(row_centres):
+
+#             # 🔥 THIS IS YOUR ACTUAL CELL WINDOW
+#             x_shift = X_SHIFT
+#             top    = (cy - y_half * 0.5) + y_shift
+#             bottom = (cy + y_half * 2.5) + y_shift
+#             left   = cx - col_half + x_shift
+#             right  = cx + col_half + x_shift
+
+#             rect = fitz.Rect(left, top, right, bottom)
+
+#             # draw rectangle
+#             shape.draw_rect(rect)
+
+#     shape.finish(color=(1, 0, 0), width=0.7)  # red boxes
+#     shape.commit()
+
+#     out_path = os.path.join(output_folder, f"debug_page_{page_no+1}.png")
+#     pix = page.get_pixmap(dpi=150)
+#     pix.save(out_path)
+
+#     print(f"🟥 Debug image saved → {out_path}")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Main pipeline
@@ -550,6 +613,7 @@ def process_pdf(pdf_path: str):
     all_records: list = []
     for page_no in tqdm(range(len(doc)), desc=f"Processing {file_name}"):
         page    = doc[page_no]
+        # draw_debug_cells(page, layout, page_no, output_folder)
         records = extract_from_pdf_page_10(page, layout)
         status  = f"✅ {len(records)} records" if records else "⚠️  no records"
         tqdm.write(f"  Page {page_no + 1}: {status}")
