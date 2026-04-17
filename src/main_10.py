@@ -236,12 +236,17 @@ Return ONLY raw JSON, no markdown, no code fences:
 
 def _vision_detect_labels(pdf_path: str) -> dict:
     print("  🔭 Running vision model to detect column/floor labels …")
-    with tempfile.TemporaryDirectory() as tmpdir:
-        imgs = convert_pdf_to_images(pdf_path, tmpdir, dpi=200)
-        if not imgs:
-            print("  ⚠️  PDF→image conversion failed.")
-            return {"col_headers": [], "floor_ranges": []}
-        raw = extract_from_image(imgs[0], _VISION_PROMPT)
+
+    # 🔥 FIX: use output folder instead of temp directory
+    output_folder = os.path.join(OUTPUT_DIR, os.path.splitext(os.path.basename(pdf_path))[0])
+    os.makedirs(output_folder, exist_ok=True)
+    imgs = convert_pdf_to_images(pdf_path, output_folder, dpi=200)
+    if not imgs:
+        print("  ⚠️  PDF→image conversion failed.")
+        return {"col_headers": [], "floor_ranges": []}
+
+    raw = extract_from_image(imgs[0], _VISION_PROMPT)
+
     try:
         text = raw.strip()
         if "```" in text:
@@ -256,8 +261,6 @@ def _vision_detect_labels(pdf_path: str) -> dict:
         result       = json.loads(text)
         col_headers  = [str(h).strip().upper() for h in result.get("col_headers",  [])]
         floor_ranges = [str(f).strip().upper() for f in result.get("floor_ranges", [])]
-        print(f"  Vision → col_headers  : {col_headers}")
-        print(f"  Vision → floor_ranges : {floor_ranges}")
         return {"col_headers": col_headers, "floor_ranges": floor_ranges}
     except Exception as e:
         print(f"  ⚠️  Vision parse failed: {e}\n  Raw: {raw[:300]}")
@@ -322,9 +325,6 @@ def _detect_grid_centres_10(words: list):
     col_centres  = cluster_1d(xs)
     raw_row_ys   = cluster_1d(ys)
 
-    print(f"  'NNN X MMM' triplets found: {len(xs)}  "
-          f"→ {len(col_centres)} col clusters, {len(raw_row_ys)} raw row clusters")
-
     return col_centres, raw_row_ys
 
 
@@ -378,12 +378,7 @@ def detect_layout_10(doc: fitz.Document, pdf_path: str) -> dict:
         y_shift = sub_spacing   # one sub-row down ≈ 33 pt
     else:
         y_shift = 0.0           # SIZE is already at the row centre
-
-    print(
-        f"  col_spacing={col_spacing:.1f}  row_spacing={row_spacing:.1f}  "
-        f"sub_spacing={sub_spacing:.1f}\n"
-        f"  col_half={col_half:.1f}  y_half={y_half:.1f}  y_shift={y_shift:.1f}"
-    )
+        
 
     # ── Assign names by rank order ────────────────────────────────────────────
     col_names = [
