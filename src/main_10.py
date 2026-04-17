@@ -1,8 +1,3 @@
-"""
-main_10.py  —  Pattern-10 Column Schedule Extractor
-
-"""
-
 import os
 import re
 import json
