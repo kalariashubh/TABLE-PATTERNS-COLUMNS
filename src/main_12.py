@@ -1,33 +1,3 @@
-"""
-main_12.py  ─  Pattern-12 column schedule extractor
-=====================================================
-Generalized extraction — ZERO hard-coded pixel coordinates.
-
-APPROACH  (adapted from pattern-11 architecture)
-------------------------------------------------
-1.  Render PDF at 300 DPI.
-2.  Scan for bright-green [0,255,0] text to locate the footing section start
-    (last green group = footing block).
-3.  Detect data-column VERTICAL boundaries by scanning for full-height
-    red lines: scipy find_peaks on red-pixel column density > 30 % over
-    the floor-row y-range.
-4.  Extract column marks (GPT-4o on marks strip at bottom).
-5.  Reconcile V-lines with mark count: trim extra lines from LEFT
-    (label column internal dividers).  Never resample.
-6.  Detect floor-row HORIZONTAL boundaries:
-      Primary  → red H-line density scan inside data columns.
-      Fallback → evenly-spaced rows based on GPT-4o floor count.
-7.  Extract ALL floor labels in one GPT-4o call on the full label column.
-8.  Extract each data cell (GPT-4o with pixel pre-check).
-9.  Expand combined marks: "C1,C18" → C1 + C18.
-10. Stirrups always null.
-
-DEPENDENCIES
-------------
-    pip install pdf2image Pillow scipy numpy openai
-    sudo apt-get install poppler-utils   # or: brew install poppler
-"""
-
 import json
 import os
 import re
