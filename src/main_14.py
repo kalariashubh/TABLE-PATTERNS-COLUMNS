@@ -57,6 +57,38 @@ def extract_floor(image_path, prompt, floor_name, total_positions):
         return parsed.get("columns", [])
     except:
         return []
+    
+def fix_alignment(column_groups, floor_data, floor_name):
+    total = len(column_groups)
+
+    # normalize length first
+    if len(floor_data) < total:
+        floor_data += [None] * (total - len(floor_data))
+    floor_data = floor_data[:total]
+
+    # convert raw None properly
+    def is_null(col):
+        if col is None:
+            return True
+        size = col.get("size", {})
+        return not size or all(v is None for v in size.values())
+
+    # detect null positions based on pattern (VERY IMPORTANT)
+    # pattern-14 is FIXED layout → use rule-based correction
+
+    # FIRST FLOOR → first column is null
+    if floor_name == "FIRST FLOOR":
+        if not is_null(floor_data[0]):
+            floor_data = [None] + floor_data[:-1]
+
+    # ROOF FLOOR → first and last are null
+    if floor_name == "ROOF FLOOR":
+        if not is_null(floor_data[0]):
+            floor_data = [None] + floor_data[:-1]
+        if not is_null(floor_data[-1]):
+            floor_data = floor_data[1:] + [None]
+
+    return floor_data
 
 
 # ==============================
@@ -118,13 +150,12 @@ def process_pdf(pdf_path):
                 total_positions
             )
 
-            if len(floor_data) != total_positions:
-                continue
+            floor_data = fix_alignment(column_groups, floor_data, floor)
 
             for i in range(total_positions):
 
                 col_group = column_groups[i]
-                col_data = floor_data[i]
+                col_data = floor_data[i] if i < len(floor_data) else None
 
                 # 🔥 FIX: Handle None returned by vision model
                 if col_data is None:
