@@ -1,3 +1,33 @@
+"""
+main_12.py  ─  Pattern-12 column schedule extractor
+=====================================================
+Generalized extraction — ZERO hard-coded pixel coordinates.
+
+APPROACH  (adapted from pattern-11 architecture)
+------------------------------------------------
+1.  Render PDF at 300 DPI.
+2.  Scan for bright-green [0,255,0] text to locate the footing section start
+    (last green group = footing block).
+3.  Detect data-column VERTICAL boundaries by scanning for full-height
+    red lines: scipy find_peaks on red-pixel column density > 30 % over
+    the floor-row y-range.
+4.  Extract column marks (GPT-4o on marks strip at bottom).
+5.  Reconcile V-lines with mark count: trim extra lines from LEFT
+    (label column internal dividers).  Never resample.
+6.  Detect floor-row HORIZONTAL boundaries:
+      Primary  → red H-line density scan inside data columns.
+      Fallback → evenly-spaced rows based on GPT-4o floor count.
+7.  Extract ALL floor labels in one GPT-4o call on the full label column.
+8.  Extract each data cell (GPT-4o with pixel pre-check).
+9.  Expand combined marks: "C1,C18" → C1 + C18.
+10. Stirrups always null.
+
+DEPENDENCIES
+------------
+    pip install pdf2image Pillow scipy numpy openai
+    sudo apt-get install poppler-utils   # or: brew install poppler
+"""
+
 import json
 import os
 import re
@@ -13,7 +43,8 @@ from pdf2image import convert_from_path
 from scipy.signal import find_peaks
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import INPUT_DIR, OUTPUT_DIR, OPENAI_API_KEY
+from config import INPUT_DIR, OUTPUT_DIR, OPENAI_API_KEY   # noqa: E402
+
 
 # ═══════════════════════════════════════════════════════════════════
 #  §1  SCIPY LINE UTILITIES
@@ -393,7 +424,7 @@ def render_pdf(pdf_path: str, out_dir: str, dpi: int = 300) -> list:
     pages = convert_from_path(pdf_path, dpi=dpi)
     paths = []
     for i, page in enumerate(pages):
-        p = os.path.join(out_dir, f"page_{i+1:03d}.png")
+        p = os.path.join(out_dir, f"page_{i+1:01d}.png")
         page.save(p, "PNG")
         paths.append(p)
     print(f"  Rendered {len(paths)} page(s) at {dpi} DPI")
@@ -422,40 +453,75 @@ def process_page(img_path: str, client) -> list:
     print(f"  Floor data y-range: {floor_data_y0}–{footing_y0}  "
           f"|  footing starts y={footing_y0}")
 
-    # ── §11.2  Column V-line detection (raw) ──────────────────────────────────
+    # ── §11.2  Column V-line detection (robust multi-pass) ───────────────
+
+    col_bounds = []
+
+    # Pass 1: strict (original)
     col_bounds = detect_col_boundaries(arr, floor_data_y0, footing_y0,
-                                        x_min=0, threshold=0.30, min_dist=15)
+                                    x_min=0, threshold=0.30, min_dist=15)
+
+    # Pass 2: medium (for thinner lines)
     if len(col_bounds) < 3:
         col_bounds = detect_col_boundaries(arr, floor_data_y0, footing_y0,
-                                            x_min=0, threshold=0.20, min_dist=15)
+                                        x_min=0, threshold=0.18, min_dist=12)
+
+    # Pass 3: aggressive (pat-12 type drawings)
+    if len(col_bounds) < 3:
+        col_bounds = detect_col_boundaries(arr, floor_data_y0, footing_y0,
+                                        x_min=0, threshold=0.10, min_dist=10)
+
+    # Final fallback: use smoothed projection (VERY IMPORTANT)
+    if len(col_bounds) < 3:
+        print("  ⚠ Switching to fallback V-line detection")
+
+        region = arr[floor_data_y0:footing_y0, :]
+        r = region[:, :, 0].astype(int)
+        g = region[:, :, 1].astype(int)
+        b = region[:, :, 2].astype(int)
+
+        red_mask = (r > 140) & ((r - g) > 40) & ((r - b) > 40)
+        density = red_mask.mean(axis=0)
+
+        # Smooth signal (THIS fixes broken lines)
+        density = np.convolve(density, np.ones(15)/15, mode='same')
+
+        peaks, _ = find_peaks(density, height=0.08, distance=8)
+        col_bounds = cluster_lines([int(p) for p in peaks], gap=10)
+
+    # Final check
     if len(col_bounds) < 3:
         print("  ❌ Column detection failed — skipping page")
         return []
-
-    print(f"  Raw V-lines detected: {len(col_bounds)}  "
-          f"x={col_bounds[0]}–{col_bounds[-1]}")
-
+    
     # ── §11.3  Column marks (GPT-4o) ─────────────────────────────────────────
     print("  [1/3] Extracting column marks …")
+
     my1, my2 = find_marks_strip_y(arr, x0=0, x1=W,
-                                   search_y0=footing_y0, search_y1=H)
+                                search_y0=footing_y0, search_y1=H)
+
     marks_img = _crop_upscale(pil, 0, my1, W, my2, upscale=3)
     print(f"  Column marks strip: y={my1}–{my2}")
 
     raw_marks = call_vision(client, marks_img, _PROMPT_COL_MARKS, max_tokens=200)
     parsed    = _parse_json(raw_marks)
+
     col_marks = []
     if parsed and isinstance(parsed.get("column_marks"), list):
         col_marks = [norm_column_no(m) for m in parsed["column_marks"] if m]
 
-    if not col_marks:                   # fallback: full footing section
+    # fallback (VERY IMPORTANT for pat-12)
+    if not col_marks:
+        print("  ⚠ Retry column marks using full footing section")
         marks_img2 = _crop_upscale(pil, 0, footing_y0, W, H, upscale=2)
         raw2       = call_vision(client, marks_img2, _PROMPT_COL_MARKS, max_tokens=200)
         parsed2    = _parse_json(raw2)
+
         if parsed2 and isinstance(parsed2.get("column_marks"), list):
             col_marks = [norm_column_no(m) for m in parsed2["column_marks"] if m]
 
     print(f"  → {len(col_marks)} marks: {col_marks}")
+
     if not col_marks:
         print("  ❌ No column marks found — skipping page")
         return []
@@ -483,18 +549,58 @@ def process_page(img_path: str, client) -> list:
 
     # ── §11.5  Floor row boundary detection ───────────────────────────────────
     # Primary: red H-line scan inside the data columns
+    # ── §11.5  Floor row boundary detection (robust) ─────────────
+
+    h_lines = []
+
+    # Pass 1: strict
     h_lines = detect_row_boundaries(arr,
-                                     x0=data_col_x[0], x1=data_col_x[-1],
-                                     y0=floor_data_y0,  y1=footing_y0,
-                                     threshold=0.15,    min_dist=80)
+        x0=data_col_x[0], x1=data_col_x[-1],
+        y0=floor_data_y0, y1=footing_y0,
+        threshold=0.15, min_dist=80)
+
+    # Pass 2: medium
+    if len(h_lines) < 5:
+        h_lines = detect_row_boundaries(arr,
+            x0=data_col_x[0], x1=data_col_x[-1],
+            y0=floor_data_y0, y1=footing_y0,
+            threshold=0.08, min_dist=60)
+
+    # Pass 3: aggressive (pattern-12 fix)
+    if len(h_lines) < 5:
+        h_lines = detect_row_boundaries(arr,
+            x0=data_col_x[0], x1=data_col_x[-1],
+            y0=floor_data_y0, y1=footing_y0,
+            threshold=0.04, min_dist=40)
+
+    # Final fallback: smoothed projection
+    if len(h_lines) < 5:
+        print("  ⚠ Switching to fallback H-line detection")
+
+        region = arr[floor_data_y0:footing_y0,
+                    data_col_x[0]:data_col_x[-1]]
+
+        r = region[:, :, 0].astype(int)
+        g = region[:, :, 1].astype(int)
+        b = region[:, :, 2].astype(int)
+
+        red_mask = (r > 140) & ((r - g) > 40) & ((r - b) > 40)
+        density = red_mask.mean(axis=1)
+
+        # smooth (CRITICAL)
+        density = np.convolve(density, np.ones(25)/25, mode='same')
+
+        peaks, _ = find_peaks(density, height=0.03, distance=35)
+        h_lines = cluster_lines([int(p) + floor_data_y0 for p in peaks], gap=8)
+
+    # Build row bounds
     if h_lines:
-        all_ys     = [floor_data_y0] + h_lines + [footing_y0]
-        row_bounds = [(all_ys[i], all_ys[i + 1]) for i in range(len(all_ys) - 1)]
-        print(f"  Floor rows from H-lines: {len(row_bounds)}  "
-              f"(lines at y={h_lines})")
+        all_ys = [floor_data_y0] + h_lines + [footing_y0]
+        row_bounds = [(all_ys[i], all_ys[i+1]) for i in range(len(all_ys)-1)]
+        print(f"  Floor rows detected: {len(row_bounds)} (from H-lines)")
     else:
-        row_bounds = None       # will be set after GPT-4o floor count is known
-        print("  No H-lines found — will use GPT-4o floor count")
+        row_bounds = None
+        print("  ❌ H-line detection failed — fallback will be used")
 
     # ── §11.6  Floor labels (GPT-4o on full label column — one call) ──────────
     print("  [2/3] Extracting floor labels …")
