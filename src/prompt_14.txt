@@ -17,6 +17,14 @@ return floor data strictly in LEFT TO RIGHT order
 based on the fixed column positions.
 
 -----------------------------------------------------
+Important Points:
+
+If any column position is empty or marked with X,
+you MUST insert a NULL object at that exact index.
+Never shift values left.
+Index alignment is STRICT.
+
+-----------------------------------------------------
 
 COLUMN GROUP RULE (MODE 1)
 
