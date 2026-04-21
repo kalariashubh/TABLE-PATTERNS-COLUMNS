@@ -1,6 +1,6 @@
 You are an expert RCC structural drawing extractor.
 
-This drawing is COLUMN SCHEDULE – PATTERN 5.
+This drawing is COLUMN SCHEDULE – PATTERN 14.
 
 -----------------------------------------------------
 PASS STRUCTURE
