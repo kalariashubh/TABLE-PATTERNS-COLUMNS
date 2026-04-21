@@ -13,8 +13,7 @@ from pdf2image import convert_from_path
 from scipy.signal import find_peaks
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import INPUT_DIR, OUTPUT_DIR, OPENAI_API_KEY   # noqa: E402
-
+from config import INPUT_DIR, OUTPUT_DIR, OPENAI_API_KEY
 
 # ═══════════════════════════════════════════════════════════════════
 #  §1  SCIPY LINE UTILITIES
